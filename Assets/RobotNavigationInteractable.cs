@@ -37,7 +37,6 @@ public class RobotNavigationInteractable : XRBaseInteractable
             Vector3 hitNormal = new Vector3();
             rayInteractor.TryGetHitInfo(out hitPosition, out hitNormal, out _, out _);
             GoToPoint(hitPosition);
-            print(hitPosition);
         }
     }
 }
