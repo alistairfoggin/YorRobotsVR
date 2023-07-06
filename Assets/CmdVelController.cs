@@ -21,6 +21,7 @@ public class CmdVelController : MonoBehaviour
     {
         m_RosConnection = ROSConnection.GetOrCreateInstance();
         m_RosConnection.RegisterPublisher<TwistMsg>(topicName);
+
     }
 
     // Update is called once per frame
