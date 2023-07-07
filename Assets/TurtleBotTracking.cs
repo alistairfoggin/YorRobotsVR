@@ -23,8 +23,12 @@ public class TurtleBotTracking : MonoBehaviour
     {
         PointMsg pointMsg = msg.pose.pose.position;
         QuaternionMsg quaternionMsg = msg.pose.pose.orientation;
-        m_Rigdbody.MovePosition(pointMsg.From<FLU>());
-        m_Rigdbody.MoveRotation(quaternionMsg.From<FLU>());
+
+        Vector3 odomPosition = pointMsg.From<FLU>();
+        Quaternion odomOrientation = quaternionMsg.From<FLU>();
+
+        transform.localPosition = odomPosition;
+        transform.localRotation = odomOrientation;
     }
 
     // Update is called once per frame

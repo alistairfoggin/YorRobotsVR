@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_LayerNames:
   - Default
-  - Teleportation
+  - 
   - UI
   - Grab
   - 
@@ -44,4 +44,4 @@ MonoBehaviour:
   - 
   - 
   - 
-  - 
+  - Teleport
