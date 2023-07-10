@@ -1437,7 +1437,7 @@
                 {
                     "name": "",
                     "id": "cedb6952-d964-423d-a301-81f1fadcfac7",
-                    "path": "<XRController>{RightHand}/primary2DAxis",
+                    "path": "<XRController>{LeftHand}/primary2DAxis",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

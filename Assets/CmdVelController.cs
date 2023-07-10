@@ -49,4 +49,14 @@ public class CmdVelController : MonoBehaviour
             timePassed = 0;
         }
     }
+
+    public void UpdateForwardsMovement(float y)
+    {
+        input.y = y;
+    }
+
+    public void UpdateTurningMovement(float x)
+    {
+        input.x = x;
+    }
 }
