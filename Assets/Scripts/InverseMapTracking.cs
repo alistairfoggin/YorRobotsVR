@@ -28,6 +28,6 @@ public class InverseMapTracking : MonoBehaviour
         transform.localPosition = -odomPosition;
         //transform.localRotation = Quaternion.Euler(-odomOrientation.eulerAngles);
         transform.localRotation = Quaternion.Euler(Vector3.zero);
-        transform.RotateAround(Vector3.zero, Vector3.up, -odomOrientation.eulerAngles.y);
+        transform.RotateAround(Vector3.zero, Vector3.up, -odomOrientation.eulerAngles.y - 90);
     }
 }
