@@ -50,12 +50,12 @@ public class OccupancyMesh : MonoBehaviour
         m_TextureIsDirty = true;
 
         if (Time.time > m_LastDrawingFrameTime)
-            Redraw();
+            Redraw2D();
 
         m_LastDrawingFrameTime = Time.time;
     }
 
-    public void Redraw()
+    public void Redraw2D()
     {
         m_Material.mainTexture = GetTexture();
 

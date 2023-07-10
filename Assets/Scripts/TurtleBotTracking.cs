@@ -8,8 +8,8 @@ using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 
 public class TurtleBotTracking : MonoBehaviour
 {
-    ROSConnection m_RosConnection;
-    Rigidbody m_Rigdbody;
+    private ROSConnection m_RosConnection;
+    private Rigidbody m_Rigdbody;
 
     // Start is called before the first frame update
     void Start()
@@ -30,6 +30,8 @@ public class TurtleBotTracking : MonoBehaviour
         transform.localPosition = odomPosition;
         transform.localRotation = odomOrientation;
     }
+
+    
 
     // Update is called once per frame
     void Update()
