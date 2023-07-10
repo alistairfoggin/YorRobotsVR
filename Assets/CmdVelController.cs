@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Unity.Robotics.ROSTCPConnector;
 using RosMessageTypes.Geometry;
 
@@ -15,6 +16,10 @@ public class CmdVelController : MonoBehaviour
     [SerializeField]
     float messageDelay = 0.1f;
     float timePassed = 0f;
+    Vector2 input = Vector2.zero;
+
+    [SerializeField]
+    InputActionReference movement;
 
     // Start is called before the first frame update
     void Start()
@@ -22,6 +27,12 @@ public class CmdVelController : MonoBehaviour
         m_RosConnection = ROSConnection.GetOrCreateInstance();
         m_RosConnection.RegisterPublisher<TwistMsg>(topicName);
 
+        movement.action.performed += MovementPerformed;
+    }
+
+    void MovementPerformed(InputAction.CallbackContext context)
+    {
+        input = context.ReadValue<Vector2>();
     }
 
     // Update is called once per frame
@@ -30,12 +41,9 @@ public class CmdVelController : MonoBehaviour
         timePassed += Time.deltaTime;
         if (timePassed > messageDelay)
         {
-            float turningInput = Input.GetAxis("Horizontal");
-            float forwardInput = Input.GetAxis("Vertical");
-
             TwistMsg msg = new TwistMsg(
-                new Vector3Msg(forwardInput * movementSpeed, 0, 0),
-                new Vector3Msg(0, 0, -turningInput * turningSpeed));
+                new Vector3Msg(input.y * movementSpeed, 0, 0),
+                new Vector3Msg(0, 0, -input.x * turningSpeed));
 
             m_RosConnection.Publish(topicName, msg);
             timePassed = 0;

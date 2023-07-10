@@ -1425,6 +1425,28 @@
                 },
                 {
                     "name": "",
+                    "id": "90e8166c-c03b-4203-b889-dffb61939159",
+                    "path": "<XRController>{RightHand}/primary2DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cedb6952-d964-423d-a301-81f1fadcfac7",
+                    "path": "<XRController>{RightHand}/primary2DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Navigate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "9f2a7c29-a588-4b6a-a966-955eb408c526",
                     "path": "*/{Submit}",
                     "interactions": "",
