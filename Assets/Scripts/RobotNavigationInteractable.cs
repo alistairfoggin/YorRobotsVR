@@ -6,16 +6,22 @@ using Unity.Robotics.ROSTCPConnector;
 using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 using RosMessageTypes.Geometry;
 using RosMessageTypes.Std;
+using RosMessageTypes.Nav;
 using RosMessageTypes.BuiltinInterfaces;
 
 public class RobotNavigationInteractable : XRBaseInteractable
 {
-    ROSConnection ros;
+    ROSConnection m_ROSConnection;
+    TFSystem m_TFSystem;
+    HeaderMsg m_HeaderMsg;
     public string topicName = "/goal_pose";
     private void Start()
     {
-        ros = ROSConnection.GetOrCreateInstance();
-        ros.RegisterPublisher<PoseStampedMsg>(topicName);
+        m_ROSConnection = ROSConnection.GetOrCreateInstance();
+        m_ROSConnection.RegisterPublisher<PoseStampedMsg>(topicName);
+
+        
+        m_TFSystem = TFSystem.GetOrCreateInstance();
         GoToPoint(new Vector3(0.2f, 0, 0));
     }
 
@@ -25,7 +31,7 @@ public class RobotNavigationInteractable : XRBaseInteractable
             new HeaderMsg(new TimeMsg(), "map"),
             new PoseMsg(goal.To<FLU>(), new QuaternionMsg()));
 
-        ros.Publish(topicName, msg);
+        m_ROSConnection.Publish(topicName, msg);
     }
 
     protected override void OnActivated(ActivateEventArgs args)
@@ -33,13 +39,25 @@ public class RobotNavigationInteractable : XRBaseInteractable
         if (args.interactorObject is XRRayInteractor)
         {
             XRRayInteractor rayInteractor = (XRRayInteractor)args.interactorObject;
-            Vector3 hitPosition = new Vector3();
-            Vector3 hitNormal = new Vector3();
+            Vector3 hitPosition;
+            Vector3 hitNormal;
             rayInteractor.TryGetHitInfo(out hitPosition, out hitNormal, out _, out _);
-            Vector3 destination = transform.InverseTransformPoint(hitPosition);
+
+            Vector3 destination = GetComponentInParent<Transform>().InverseTransformPoint(hitPosition);
+
+            if (m_HeaderMsg != null)
+            {
+                destination = m_TFSystem.GetTransform(m_HeaderMsg).InverseTransformPoint(destination);
+            }
+            
             // destination.Scale(transform.localScale);
-            // destination = Quaternion.Euler(0, -90, 0) * destination;
+            //destination = Quaternion.Euler(0, 90, 0) * destination;
             GoToPoint(destination);
         }
+    }
+
+    private void UpdateMap(OccupancyGridMsg msg)
+    {
+        m_HeaderMsg = msg.header;
     }
 }

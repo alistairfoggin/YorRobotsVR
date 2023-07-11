@@ -13,7 +13,7 @@ public class OccupancyMesh : MonoBehaviour
     ROSConnection m_ROSConnection;
     TFSystem m_TFSystem;
 
-    static sbyte[] grid = new sbyte[] { 0, 1, 
+    static sbyte[] grid = new sbyte[] { 0, 0, 
                                         0, 0 };
 
     static OccupancyGridMsg staticMsg = new OccupancyGridMsg(new HeaderMsg(),
@@ -21,12 +21,19 @@ public class OccupancyMesh : MonoBehaviour
         new TimeMsg(), 1f, 2, 2, new PoseMsg()), grid);
 
     Mesh m_Mesh;
+
+    List<Vector3> vertexBuffer;
+    List<Vector2> uvBuffer;
+    List<int> triBuffer;
+
     Texture2D m_Texture;
     private OccupancyGridMsg m_Message;
     bool m_TextureIsDirty = true;
     [SerializeField]
     Material m_Material;
     private float m_LastDrawingFrameTime;
+    [SerializeField]
+    private float wallHeight = 0.4f;
 
     // Start is called before the first frame update
     void Start()
@@ -41,8 +48,13 @@ public class OccupancyMesh : MonoBehaviour
         GetComponent<MeshRenderer>().material = m_Material;
         GetComponent<MeshCollider>().sharedMesh = m_Mesh;
 
-        Generate2DMesh();
+        vertexBuffer = new List<Vector3>(201 * 201);
+        uvBuffer = new List<Vector2>(201 * 201);
+        triBuffer = new List<int>(200 * 200 * 6);
 
+        //Generate2DMesh();
+
+        //m_Message = staticMsg;
         //GenerateMesh();
 
     }
@@ -52,8 +64,9 @@ public class OccupancyMesh : MonoBehaviour
         m_Message = occupancyGridMsg;
         m_TextureIsDirty = true;
 
-        if (Time.time > m_LastDrawingFrameTime)
-            Redraw2D();
+        if (Time.time > m_LastDrawingFrameTime + 1)
+            //Redraw2D();
+            Redraw();
 
         m_LastDrawingFrameTime = Time.time;
     }
@@ -110,56 +123,76 @@ public class OccupancyMesh : MonoBehaviour
         return m_Texture;
     }
 
+    void Redraw()
+    {
+        GenerateMesh();
+
+        Vector3 origin = m_Message.info.origin.position.From<FLU>();
+        Quaternion rotation = m_Message.info.origin.orientation.From<FLU>();
+        rotation.eulerAngles += new Vector3(0, -90, 0);
+        float scale = m_Message.info.resolution;
+
+        // offset the mesh by half a grid square, because the message's position defines the CENTER of grid square 0,0
+        Vector3 drawOrigin = origin - rotation * new Vector3(scale * 0.5f, 0, scale * 0.5f);
+
+        TFFrame tfFrame = m_TFSystem.GetTransform(m_Message.header);
+        drawOrigin = tfFrame.TransformPoint(drawOrigin);
+        rotation = Quaternion.Euler(rotation.eulerAngles + tfFrame.rotation.eulerAngles);
+
+        transform.localPosition = drawOrigin;
+        transform.localRotation = rotation;
+    }
+
     void GenerateMesh()
     {
         MapMetaDataMsg info = m_Message.info;
-        Vector3[] vertices = new Vector3[(info.height + 1) * (info.height + 1)];
-        Vector2[] uv= new Vector2[(info.height + 1) * (info.height + 1)];
+        vertexBuffer.Clear();
+        vertexBuffer.Capacity = ((int)info.width + 1) * ((int)info.height + 1);
+        uvBuffer.Clear();
+        uvBuffer.Capacity = ((int)info.width + 1) * ((int)info.height + 1);
+        //Vector3[] vertices = new Vector3[(info.width + 1) * (info.height + 1)];
+        //Vector2[] uv = new Vector2[(info.width + 1) * (info.height + 1)];
 
-        int numSquares = 0;
-        for (int row = 0; row <= info.height; row++)
+        for (int y = 0; y <= info.height; y++)
         {
-            for (int col = 0; col <= info.width; col++)
+            for (int x = 0; x <= info.width; x++)
             {
-                vertices[col + info.width * row] = new Vector3(col * info.resolution, 0, -row * info.resolution);
-                uv[col + info.width * row] = new Vector2(col / info.width, 1 - row / info.height);
-                if (row < info.height && col < info.width && m_Message.data[col + info.width * row] > 0)
+                Vector3 vertex = new Vector3(x * info.resolution, 0, y * info.resolution);
+
+                int threshold = 50;
+                if (x < info.width && y < info.height && m_Message.data[x + info.width * y] > threshold // Check upper right of vertex
+                    || (x > 0 && y < info.height && m_Message.data[x - 1 + info.width * y] > threshold) // Check upper left of vertex
+                    || (x < info.width && y > 0 && m_Message.data[x + info.width * (y - 1)] > threshold) // Check lower right of vertex
+                    || (x > 0 && y > 0 && m_Message.data[x - 1 + info.width * (y - 1)] > threshold)) // Check lower left of vertex
                 {
-                    numSquares++;
+                    vertex.y = wallHeight;
                 }
-                print(vertices[col + info.width * row]);
+
+                vertexBuffer.Add(vertex);
+                uvBuffer.Add(new Vector2(x / info.width, 1 - y / info.height));
             }
         }
-        print(numSquares);
-        int[] triangles = new int[numSquares * 2 * 3];
-        int i = 0;
+
+        triBuffer.Clear();
+        triBuffer.Capacity = ((int)info.width) * ((int)info.height) * 3 * 2;
         for (int row = 0; row < info.height; row++)
         {
             for (int col = 0; col < info.width; col++)
             {
-                if (m_Message.data[col + info.width * row] > 0)
-                {
-                    // TODO: update triangles to work
-                    triangles[0 + i*6] = (int)(col + row * (info.width+1));
-                    triangles[1 + i*6] = (int)(col + 1 + (row + 1) * (info.width+1));
-                    triangles[2 + i*6] = (int)(col + 1 + row * (info.width + 1));
-                    triangles[3 + i*6] = (int)(col + row * (info.width + 1));
-                    triangles[4 + i*6] = (int)(col + (row + 1) * (info.width + 1));
-                    triangles[5 + i*6] = (int)(col + 1 + (row + 1) * (info.width + 1));
+                    triBuffer.Add((int)(col + row * (info.width + 1)));
+                    triBuffer.Add((int)(col + (row + 1) * (info.width + 1)));
+                    triBuffer.Add((int)(col + 1 + row * (info.width + 1)));
 
-                    print(triangles[0 + i * 6]);
-                    print(triangles[1 + i * 6]);
-                    print(triangles[2 + i * 6]);
-                    print(triangles[3 + i * 6]);
-                    print(triangles[4 + i * 6]);
-                    print(triangles[5 + i * 6]);
-                    i++;
-                }
+                    triBuffer.Add((int)(col + (row + 1) * (info.width + 1)));
+                    triBuffer.Add((int)(col + 1 + (row + 1) * (info.width + 1)));
+                    triBuffer.Add((int)(col + 1 + row * (info.width + 1)));
             }
         }
 
-        m_Mesh.vertices = vertices;
-        m_Mesh.uv = uv;
-        m_Mesh.triangles = triangles;
+        m_Mesh.Clear();
+        m_Mesh.SetVertices(vertexBuffer);
+        m_Mesh.SetUVs(0, uvBuffer);
+        m_Mesh.SetTriangles(triBuffer, 0);
+        m_Mesh.RecalculateNormals();
     }
 }
