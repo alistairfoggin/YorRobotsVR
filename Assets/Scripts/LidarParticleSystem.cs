@@ -6,6 +6,7 @@ using Unity.Robotics.ROSTCPConnector;
 public class LidarParticleSystem : MonoBehaviour
 {
     private ROSConnection m_RosConnection;
+    private TFSystem m_TFSystem;
     private ParticleSystem m_ParticleSystem;
     private LaserScanMsg m_LaserScan;
 
@@ -14,6 +15,8 @@ public class LidarParticleSystem : MonoBehaviour
     {
         m_RosConnection = ROSConnection.GetOrCreateInstance();
         m_RosConnection.Subscribe<LaserScanMsg>("/scan", LaserScanChange);
+
+        m_TFSystem = TFSystem.GetOrCreateInstance();
 
         m_ParticleSystem = GetComponent<ParticleSystem>();
     }
@@ -36,6 +39,9 @@ public class LidarParticleSystem : MonoBehaviour
             {
                 Quaternion rotation = Quaternion.Euler(0, -Mathf.Rad2Deg * currentAngleRad, 0);
                 Vector3 localPosition = rotation * Vector3.forward * m_LaserScan.ranges[i];
+
+                TFFrame tfFrame = m_TFSystem.GetTransform(m_LaserScan.header);
+                localPosition = tfFrame.TransformPoint(localPosition);
 
                 var emitParams = new ParticleSystem.EmitParams();
                 emitParams.position = transform.TransformPoint(localPosition);

@@ -246,6 +246,7 @@ MonoBehaviour:
     m_Bits: 2147483648
   m_AttachTransform: {fileID: 0}
   m_KeepSelectedTargetValid: 1
+  m_DisableVisualsWhenBlockedInGroup: 1
   m_StartingSelectedInteractable: {fileID: 0}
   m_StartingTargetFilter: {fileID: 0}
   m_HoverEntered:
@@ -330,9 +331,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   m_RaycastTriggerInteraction: 1
+  m_RaycastSnapVolumeInteraction: 1
   m_HitClosestOnly: 0
   m_HoverToSelect: 0
   m_HoverTimeToSelect: 0.5
+  m_AutoDeselect: 0
+  m_TimeToAutoDeselect: 3
   m_EnableUIInteraction: 1
   m_AllowAnchorControl: 1
   m_UseForceGrab: 1
@@ -590,6 +594,7 @@ MonoBehaviour:
   m_BlockedReticle: {fileID: 0}
   m_StopLineAtFirstRaycastHit: 1
   m_StopLineAtSelection: 0
+  m_SnapEndpointIfAvailable: 1
 --- !u!1 &717567414885783812
 GameObject:
   m_ObjectHideFlags: 0
@@ -1018,6 +1023,7 @@ MonoBehaviour:
     m_Bits: 4294967293
   m_AttachTransform: {fileID: 0}
   m_KeepSelectedTargetValid: 1
+  m_DisableVisualsWhenBlockedInGroup: 1
   m_StartingSelectedInteractable: {fileID: 0}
   m_StartingTargetFilter: {fileID: 0}
   m_HoverEntered:
@@ -1102,9 +1108,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 115
   m_RaycastTriggerInteraction: 1
+  m_RaycastSnapVolumeInteraction: 1
   m_HitClosestOnly: 0
   m_HoverToSelect: 0
   m_HoverTimeToSelect: 0.5
+  m_AutoDeselect: 0
+  m_TimeToAutoDeselect: 3
   m_EnableUIInteraction: 1
   m_AllowAnchorControl: 1
   m_UseForceGrab: 1
@@ -1362,6 +1371,7 @@ MonoBehaviour:
   m_BlockedReticle: {fileID: 0}
   m_StopLineAtFirstRaycastHit: 1
   m_StopLineAtSelection: 0
+  m_SnapEndpointIfAvailable: 1
 --- !u!1 &717567415506971108
 GameObject:
   m_ObjectHideFlags: 0
@@ -1757,6 +1767,7 @@ MonoBehaviour:
     m_Bits: 2147483648
   m_AttachTransform: {fileID: 0}
   m_KeepSelectedTargetValid: 1
+  m_DisableVisualsWhenBlockedInGroup: 1
   m_StartingSelectedInteractable: {fileID: 0}
   m_StartingTargetFilter: {fileID: 0}
   m_HoverEntered:
@@ -1841,9 +1852,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   m_RaycastTriggerInteraction: 1
+  m_RaycastSnapVolumeInteraction: 1
   m_HitClosestOnly: 0
   m_HoverToSelect: 0
   m_HoverTimeToSelect: 0.5
+  m_AutoDeselect: 0
+  m_TimeToAutoDeselect: 3
   m_EnableUIInteraction: 1
   m_AllowAnchorControl: 1
   m_UseForceGrab: 1
@@ -2101,6 +2115,7 @@ MonoBehaviour:
   m_BlockedReticle: {fileID: 0}
   m_StopLineAtFirstRaycastHit: 1
   m_StopLineAtSelection: 0
+  m_SnapEndpointIfAvailable: 1
 --- !u!1 &717567416651991825
 GameObject:
   m_ObjectHideFlags: 0
@@ -2347,6 +2362,7 @@ MonoBehaviour:
     m_Bits: 4294967293
   m_AttachTransform: {fileID: 0}
   m_KeepSelectedTargetValid: 1
+  m_DisableVisualsWhenBlockedInGroup: 1
   m_StartingSelectedInteractable: {fileID: 0}
   m_StartingTargetFilter: {fileID: 0}
   m_HoverEntered:
@@ -2431,9 +2447,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 115
   m_RaycastTriggerInteraction: 1
+  m_RaycastSnapVolumeInteraction: 1
   m_HitClosestOnly: 0
   m_HoverToSelect: 0
   m_HoverTimeToSelect: 0.5
+  m_AutoDeselect: 0
+  m_TimeToAutoDeselect: 3
   m_EnableUIInteraction: 1
   m_AllowAnchorControl: 1
   m_UseForceGrab: 1
@@ -2691,6 +2710,7 @@ MonoBehaviour:
   m_BlockedReticle: {fileID: 0}
   m_StopLineAtFirstRaycastHit: 1
   m_StopLineAtSelection: 0
+  m_SnapEndpointIfAvailable: 1
 --- !u!1 &717567416719233336
 GameObject:
   m_ObjectHideFlags: 0

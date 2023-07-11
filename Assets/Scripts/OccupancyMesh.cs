@@ -11,6 +11,7 @@ using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 public class OccupancyMesh : MonoBehaviour
 {
     ROSConnection m_ROSConnection;
+    TFSystem m_TFSystem;
 
     static sbyte[] grid = new sbyte[] { 0, 1, 
                                         0, 0 };
@@ -33,6 +34,8 @@ public class OccupancyMesh : MonoBehaviour
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
         m_ROSConnection.Subscribe<OccupancyGridMsg>("/map", UpdateMap);
 
+        m_TFSystem = TFSystem.GetOrCreateInstance();
+
         m_Mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = m_Mesh;
         GetComponent<MeshRenderer>().material = m_Material;
@@ -46,7 +49,7 @@ public class OccupancyMesh : MonoBehaviour
 
     void UpdateMap(OccupancyGridMsg occupancyGridMsg)
     {
-        m_Message = (OccupancyGridMsg) occupancyGridMsg;
+        m_Message = occupancyGridMsg;
         m_TextureIsDirty = true;
 
         if (Time.time > m_LastDrawingFrameTime)
@@ -66,6 +69,11 @@ public class OccupancyMesh : MonoBehaviour
 
         // offset the mesh by half a grid square, because the message's position defines the CENTER of grid square 0,0
         Vector3 drawOrigin = origin - rotation * new Vector3(scale * 0.5f, 0, scale * 0.5f);
+
+        TFFrame tfFrame = m_TFSystem.GetTransform(m_Message.header);
+        drawOrigin = tfFrame.TransformPoint(drawOrigin);
+        rotation = Quaternion.Euler(rotation.eulerAngles + tfFrame.rotation.eulerAngles);
+
         transform.localPosition = drawOrigin;
         transform.localRotation = rotation;
         transform.localScale = new Vector3(m_Message.info.width * scale, 1, m_Message.info.height * scale);
