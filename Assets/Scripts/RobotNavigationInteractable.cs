@@ -6,21 +6,22 @@ using Unity.Robotics.ROSTCPConnector;
 using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 using RosMessageTypes.Geometry;
 using RosMessageTypes.Std;
-using RosMessageTypes.Nav;
+using RosMessageTypes.Rosgraph;
 using RosMessageTypes.BuiltinInterfaces;
 
 public class RobotNavigationInteractable : XRBaseInteractable
 {
     ROSConnection m_ROSConnection;
+    ROSTime m_ROSTime;
     TFSystem m_TFSystem;
-    HeaderMsg m_HeaderMsg;
     public string topicName = "/goal_pose";
     private void Start()
     {
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
         m_ROSConnection.RegisterPublisher<PoseStampedMsg>(topicName);
 
-        
+        m_ROSTime = ROSTime.GetOrCreateInstance();
+
         m_TFSystem = TFSystem.GetOrCreateInstance();
         GoToPoint(new Vector3(0.2f, 0, 0));
     }
@@ -45,10 +46,12 @@ public class RobotNavigationInteractable : XRBaseInteractable
 
             Vector3 destination = GetComponentInParent<Transform>().InverseTransformPoint(hitPosition);
 
-            if (m_HeaderMsg != null)
+            if (m_ROSTime.LatestTimeMsg != null)
             {
-                destination = m_TFSystem.GetTransform(m_HeaderMsg).InverseTransformPoint(destination);
+                destination = m_TFSystem.GetTransform("map", m_ROSTime.LatestTimeMsg).InverseTransformPoint(destination);
             }
+
+            destination = Quaternion.Euler(0, 90, 0) * destination;
             
             // destination.Scale(transform.localScale);
             //destination = Quaternion.Euler(0, 90, 0) * destination;
@@ -56,8 +59,4 @@ public class RobotNavigationInteractable : XRBaseInteractable
         }
     }
 
-    private void UpdateMap(OccupancyGridMsg msg)
-    {
-        m_HeaderMsg = msg.header;
-    }
 }

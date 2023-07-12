@@ -1,19 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using RosMessageTypes.BuiltinInterfaces;
+using RosMessageTypes.Geometry;
 using RosMessageTypes.Nav;
 using RosMessageTypes.Std;
-using RosMessageTypes.Geometry;
-using RosMessageTypes.BuiltinInterfaces;
+using System.Collections.Generic;
 using Unity.Robotics.ROSTCPConnector;
 using Unity.Robotics.ROSTCPConnector.ROSGeometry;
+using UnityEngine;
 
 public class OccupancyMesh : MonoBehaviour
 {
     ROSConnection m_ROSConnection;
     TFSystem m_TFSystem;
 
-    static sbyte[] grid = new sbyte[] { 0, 0, 
+    static sbyte[] grid = new sbyte[] { 0, 0,
                                         0, 0 };
 
     static OccupancyGridMsg staticMsg = new OccupancyGridMsg(new HeaderMsg(),
@@ -26,9 +25,7 @@ public class OccupancyMesh : MonoBehaviour
     List<Vector2> uvBuffer;
     List<int> triBuffer;
 
-    Texture2D m_Texture;
     private OccupancyGridMsg m_Message;
-    bool m_TextureIsDirty = true;
     [SerializeField]
     Material m_Material;
     private float m_LastDrawingFrameTime;
@@ -40,10 +37,12 @@ public class OccupancyMesh : MonoBehaviour
     {
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
         m_ROSConnection.Subscribe<OccupancyGridMsg>("/map", UpdateMap);
+        m_ROSConnection.Subscribe<OdometryMsg>("/odom", UpdatePosition);
 
         m_TFSystem = TFSystem.GetOrCreateInstance();
 
         m_Mesh = new Mesh();
+
         GetComponent<MeshFilter>().mesh = m_Mesh;
         GetComponent<MeshRenderer>().material = m_Material;
         GetComponent<MeshCollider>().sharedMesh = m_Mesh;
@@ -51,18 +50,11 @@ public class OccupancyMesh : MonoBehaviour
         vertexBuffer = new List<Vector3>(201 * 201);
         uvBuffer = new List<Vector2>(201 * 201);
         triBuffer = new List<int>(200 * 200 * 6);
-
-        //Generate2DMesh();
-
-        //m_Message = staticMsg;
-        //GenerateMesh();
-
     }
 
     void UpdateMap(OccupancyGridMsg occupancyGridMsg)
     {
         m_Message = occupancyGridMsg;
-        m_TextureIsDirty = true;
 
         if (Time.time > m_LastDrawingFrameTime + 1)
             //Redraw2D();
@@ -71,56 +63,14 @@ public class OccupancyMesh : MonoBehaviour
         m_LastDrawingFrameTime = Time.time;
     }
 
-    public void Redraw2D()
+    void UpdatePosition(OdometryMsg msg)
     {
-        m_Material.mainTexture = GetTexture();
+        Vector3 position = msg.pose.pose.position.From<FLU>();
+        position = Quaternion.Euler(0, 90, 0) * (position - transform.localPosition);
 
-        Vector3 origin = m_Message.info.origin.position.From<FLU>();
-        Quaternion rotation = m_Message.info.origin.orientation.From<FLU>();
-        rotation.eulerAngles += new Vector3(0, -90, 0); // TODO: Account for differing texture origin
-        float scale = m_Message.info.resolution;
-
-        // offset the mesh by half a grid square, because the message's position defines the CENTER of grid square 0,0
-        Vector3 drawOrigin = origin - rotation * new Vector3(scale * 0.5f, 0, scale * 0.5f);
-
-        TFFrame tfFrame = m_TFSystem.GetTransform(m_Message.header);
-        drawOrigin = tfFrame.TransformPoint(drawOrigin);
-        rotation = Quaternion.Euler(rotation.eulerAngles + tfFrame.rotation.eulerAngles);
-
-        transform.localPosition = drawOrigin;
-        transform.localRotation = rotation;
-        transform.localScale = new Vector3(m_Message.info.width * scale, 1, m_Message.info.height * scale);
-    }
-
-    void Generate2DMesh()
-    {
-        m_Mesh.vertices = new[]
-        { Vector3.zero, new Vector3(0, 0, 1), new Vector3(1, 0, 1), new Vector3(1, 0, 0) };
-        m_Mesh.uv = new[] { Vector2.zero, Vector2.up, Vector2.one, Vector2.right };
-        m_Mesh.triangles = new[] { 0, 1, 2, 2, 3, 0 };       
-    }
-
-    // From OccupancyGridDefaultVisualizer
-    public Texture2D GetTexture()
-    {
-        if (!m_TextureIsDirty)
-            return m_Texture;
-
-        if (m_Texture == null)
-        {
-            m_Texture = new Texture2D((int)m_Message.info.width, (int)m_Message.info.height, TextureFormat.R8, true);
-            m_Texture.wrapMode = TextureWrapMode.Clamp;
-            m_Texture.filterMode = FilterMode.Point;
-        }
-        else if (m_Message.info.width != m_Texture.width || m_Message.info.height != m_Texture.height)
-        {
-            m_Texture.Reinitialize((int)m_Message.info.width, (int)m_Message.info.height);
-        }
-
-        m_Texture.SetPixelData(m_Message.data, 0);
-        m_Texture.Apply();
-        m_TextureIsDirty = false;
-        return m_Texture;
+        TFFrame tfFrame = m_TFSystem.GetTransform(msg.header);
+        position = tfFrame.TransformPoint(position);
+        m_Material.SetVector("_Centre", new Vector2(position.x, position.z));
     }
 
     void Redraw()
@@ -150,8 +100,6 @@ public class OccupancyMesh : MonoBehaviour
         vertexBuffer.Capacity = ((int)info.width + 1) * ((int)info.height + 1);
         uvBuffer.Clear();
         uvBuffer.Capacity = ((int)info.width + 1) * ((int)info.height + 1);
-        //Vector3[] vertices = new Vector3[(info.width + 1) * (info.height + 1)];
-        //Vector2[] uv = new Vector2[(info.width + 1) * (info.height + 1)];
 
         for (int y = 0; y <= info.height; y++)
         {
@@ -179,13 +127,13 @@ public class OccupancyMesh : MonoBehaviour
         {
             for (int col = 0; col < info.width; col++)
             {
-                    triBuffer.Add((int)(col + row * (info.width + 1)));
-                    triBuffer.Add((int)(col + (row + 1) * (info.width + 1)));
-                    triBuffer.Add((int)(col + 1 + row * (info.width + 1)));
+                triBuffer.Add((int)(col + row * (info.width + 1)));
+                triBuffer.Add((int)(col + (row + 1) * (info.width + 1)));
+                triBuffer.Add((int)(col + 1 + row * (info.width + 1)));
 
-                    triBuffer.Add((int)(col + (row + 1) * (info.width + 1)));
-                    triBuffer.Add((int)(col + 1 + (row + 1) * (info.width + 1)));
-                    triBuffer.Add((int)(col + 1 + row * (info.width + 1)));
+                triBuffer.Add((int)(col + (row + 1) * (info.width + 1)));
+                triBuffer.Add((int)(col + 1 + (row + 1) * (info.width + 1)));
+                triBuffer.Add((int)(col + 1 + row * (info.width + 1)));
             }
         }
 
