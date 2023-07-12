@@ -26,8 +26,6 @@ public class OccupancyMesh : MonoBehaviour
     List<int> triBuffer;
 
     private OccupancyGridMsg m_Message;
-    [SerializeField]
-    Material m_Material;
     private float m_LastDrawingFrameTime;
     [SerializeField]
     private float wallHeight = 0.4f;
@@ -37,15 +35,11 @@ public class OccupancyMesh : MonoBehaviour
     {
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
         m_ROSConnection.Subscribe<OccupancyGridMsg>("/map", UpdateMap);
-        m_ROSConnection.Subscribe<OdometryMsg>("/odom", UpdatePosition);
 
         m_TFSystem = TFSystem.GetOrCreateInstance();
 
         m_Mesh = new Mesh();
-
         GetComponent<MeshFilter>().mesh = m_Mesh;
-        GetComponent<MeshRenderer>().material = m_Material;
-        GetComponent<MeshCollider>().sharedMesh = m_Mesh;
 
         vertexBuffer = new List<Vector3>(201 * 201);
         uvBuffer = new List<Vector2>(201 * 201);
@@ -57,20 +51,9 @@ public class OccupancyMesh : MonoBehaviour
         m_Message = occupancyGridMsg;
 
         if (Time.time > m_LastDrawingFrameTime + 1)
-            //Redraw2D();
             Redraw();
 
         m_LastDrawingFrameTime = Time.time;
-    }
-
-    void UpdatePosition(OdometryMsg msg)
-    {
-        Vector3 position = msg.pose.pose.position.From<FLU>();
-        position = Quaternion.Euler(0, 90, 0) * (position - transform.localPosition);
-
-        TFFrame tfFrame = m_TFSystem.GetTransform(msg.header);
-        position = tfFrame.TransformPoint(position);
-        m_Material.SetVector("_Centre", new Vector2(position.x, position.z));
     }
 
     void Redraw()

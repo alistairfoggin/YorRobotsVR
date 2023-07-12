@@ -109,7 +109,7 @@ Material:
     - _Use_Bounds: 1
     - _ZWrite: 1
     m_Colors:
-    - _Centre: {r: 0, g: 0, b: 0, a: 0}
+    - _Centre: {r: 5.1233625, g: 1.8363287, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

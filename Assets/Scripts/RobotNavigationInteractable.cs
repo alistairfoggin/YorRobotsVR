@@ -1,13 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
-using Unity.Robotics.ROSTCPConnector;
-using Unity.Robotics.ROSTCPConnector.ROSGeometry;
+using RosMessageTypes.BuiltinInterfaces;
 using RosMessageTypes.Geometry;
 using RosMessageTypes.Std;
-using RosMessageTypes.Rosgraph;
-using RosMessageTypes.BuiltinInterfaces;
+using Unity.Robotics.ROSTCPConnector;
+using Unity.Robotics.ROSTCPConnector.ROSGeometry;
+using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class RobotNavigationInteractable : XRBaseInteractable
 {
@@ -15,6 +12,10 @@ public class RobotNavigationInteractable : XRBaseInteractable
     ROSTime m_ROSTime;
     TFSystem m_TFSystem;
     public string topicName = "/goal_pose";
+
+    [SerializeField]
+    Transform mapCentreTransform;
+
     private void Start()
     {
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
@@ -44,16 +45,28 @@ public class RobotNavigationInteractable : XRBaseInteractable
             Vector3 hitNormal;
             rayInteractor.TryGetHitInfo(out hitPosition, out hitNormal, out _, out _);
 
-            Vector3 destination = GetComponentInParent<Transform>().InverseTransformPoint(hitPosition);
+            if (Vector3.Dot(hitNormal.normalized, Vector3.up) < 0.95f)
+            {
+                return;
+            }
+
+            Vector3 destination;
+            if (mapCentreTransform != null)
+            {
+                destination = mapCentreTransform.InverseTransformPoint(hitPosition);
+                destination.Scale(mapCentreTransform.GetComponentInParent<Transform>().localScale);
+            }
+            else
+            {
+                destination = transform.InverseTransformPoint(hitPosition);
+                destination.Scale(transform.localScale);
+            }
 
             if (m_ROSTime.LatestTimeMsg != null)
             {
                 destination = m_TFSystem.GetTransform("map", m_ROSTime.LatestTimeMsg).InverseTransformPoint(destination);
             }
-
-            destination = Quaternion.Euler(0, 90, 0) * destination;
-            
-            // destination.Scale(transform.localScale);
+            destination.y = 0;
             //destination = Quaternion.Euler(0, 90, 0) * destination;
             GoToPoint(destination);
         }

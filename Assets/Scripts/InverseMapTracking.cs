@@ -1,15 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using RosMessageTypes.Nav;
 using RosMessageTypes.Geometry;
+using RosMessageTypes.Nav;
 using Unity.Robotics.ROSTCPConnector;
 using Unity.Robotics.ROSTCPConnector.ROSGeometry;
+using UnityEngine;
 
 public class InverseMapTracking : MonoBehaviour
 {
     private ROSConnection m_RosConnection;
     private TFSystem m_TFSystem;
+
+    [SerializeField]
+    bool trackOrientation = true;
+    [SerializeField]
+    bool trackPosition = true;
 
     // Start is called before the first frame update
     void Start()
@@ -31,8 +34,14 @@ public class InverseMapTracking : MonoBehaviour
         odomPosition = tfFrame.TransformPoint(odomPosition);
         odomPosition.y = 0;
 
-        transform.localPosition = -odomPosition;
-        transform.localRotation = Quaternion.Euler(Vector3.zero);
-        transform.RotateAround(Vector3.zero, Vector3.up, -odomOrientation.eulerAngles.y - tfFrame.rotation.eulerAngles.y - 90);
+        if (trackPosition)
+        {
+            transform.localPosition = -odomPosition;
+        }
+        if (trackOrientation)
+        {
+            transform.localRotation = Quaternion.Euler(Vector3.zero);
+            transform.RotateAround(GetComponentInParent<Transform>().position, Vector3.up, -odomOrientation.eulerAngles.y - tfFrame.rotation.eulerAngles.y);
+        }
     }
 }
