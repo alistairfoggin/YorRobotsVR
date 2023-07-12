@@ -106,7 +106,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
-    - _Use_Bounds: 1
+    - _Use_Bounds: 0
     - _ZWrite: 1
     m_Colors:
     - _Centre: {r: 5.1233625, g: 1.8363287, b: 0, a: 0}

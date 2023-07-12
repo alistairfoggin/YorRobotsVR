@@ -24,7 +24,6 @@ public class RobotNavigationInteractable : XRBaseInteractable
         m_ROSTime = ROSTime.GetOrCreateInstance();
 
         m_TFSystem = TFSystem.GetOrCreateInstance();
-        GoToPoint(new Vector3(0.2f, 0, 0));
     }
 
     public void GoToPoint(Vector3 goal)
@@ -67,7 +66,6 @@ public class RobotNavigationInteractable : XRBaseInteractable
                 destination = m_TFSystem.GetTransform("map", m_ROSTime.LatestTimeMsg).InverseTransformPoint(destination);
             }
             destination.y = 0;
-            //destination = Quaternion.Euler(0, 90, 0) * destination;
             GoToPoint(destination);
         }
     }

@@ -13,6 +13,10 @@ public class InverseMapTracking : MonoBehaviour
     bool trackOrientation = true;
     [SerializeField]
     bool trackPosition = true;
+    [SerializeField]
+    float rotationFix = 0.0f;
+    [SerializeField]
+    bool isMinimap = true;
 
     // Start is called before the first frame update
     void Start()
@@ -41,7 +45,14 @@ public class InverseMapTracking : MonoBehaviour
         if (trackOrientation)
         {
             transform.localRotation = Quaternion.Euler(Vector3.zero);
-            transform.RotateAround(GetComponentInParent<Transform>().position, Vector3.up, -odomOrientation.eulerAngles.y - tfFrame.rotation.eulerAngles.y);
+            if (isMinimap)
+            {
+                transform.RotateAround(GetComponentInParent<Transform>().position, Vector3.up, -odomOrientation.eulerAngles.y - tfFrame.rotation.eulerAngles.y - rotationFix);
+            } else
+            {
+                transform.RotateAround(Vector3.zero, Vector3.up, -odomOrientation.eulerAngles.y - tfFrame.rotation.eulerAngles.y - rotationFix);
+
+            }
         }
     }
 }
