@@ -1,6 +1,6 @@
-using UnityEngine;
 using RosMessageTypes.Sensor;
 using Unity.Robotics.ROSTCPConnector;
+using UnityEngine;
 
 [RequireComponent(typeof(ParticleSystem))]
 public class LidarParticleSystem : MonoBehaviour

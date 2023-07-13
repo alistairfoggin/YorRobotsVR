@@ -125,5 +125,8 @@ public class OccupancyMesh : MonoBehaviour
         m_Mesh.SetUVs(0, uvBuffer);
         m_Mesh.SetTriangles(triBuffer, 0);
         m_Mesh.RecalculateNormals();
+
+
+        print("Expected length: " + vertexBuffer.Capacity + " vs actual length: " + vertexBuffer.Count);
     }
 }
