@@ -8,33 +8,32 @@ public class ControlSchemeManager : MonoBehaviour
     public GameObject directControllerGameObject;
 
     public InputActionReference teleportActivationReference;
+    public InputActionReference directActivationReference;
 
     // Start is called before the first frame update
     void Start()
     {
-        teleportActivationReference.action.performed += EnableTeleportMode;
-        teleportActivationReference.action.canceled += DisableTeleportMode;
+        if (teleportationGameObject != null)
+        {
+            teleportActivationReference.action.performed += EnableTeleportMode;
+            teleportActivationReference.action.canceled += DisableTeleportMode;
+            teleportationGameObject.SetActive(false);
+        }
         rayControllerGameObject.SetActive(true);
-        teleportationGameObject.SetActive(false);
         directControllerGameObject.SetActive(false);
 
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void EnterDirectInteraction()
     {
-        print("Trigger Entered!");
-        if (teleportationGameObject.activeSelf)
-        {
-            return;
-        }
         rayControllerGameObject.SetActive(false);
         teleportationGameObject.SetActive(false);
         directControllerGameObject.SetActive(true);
     }
 
-    private void OnTriggerExit(Collider other)
+    public void ExitDirectInteraction()
     {
-        if (!directControllerGameObject.activeSelf)
+        if (!directControllerGameObject.activeInHierarchy)
         {
             return;
         }
@@ -45,10 +44,6 @@ public class ControlSchemeManager : MonoBehaviour
 
     private void EnableTeleportMode(InputAction.CallbackContext obj)
     {
-        if (directControllerGameObject.activeSelf)
-        {
-            return;
-        }
         Invoke("EnableTeleport", .1f);
     }
 
@@ -61,7 +56,7 @@ public class ControlSchemeManager : MonoBehaviour
 
     private void DisableTeleportMode(InputAction.CallbackContext obj)
     {
-        if (!teleportationGameObject.activeSelf)
+        if (!teleportationGameObject.activeInHierarchy)
         {
             return;
         }

@@ -405,6 +405,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Grab Move",
+                    "type": "Button",
+                    "id": "ef8353c5-219b-4b93-82ad-e2adb2fcd6a9",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Teleport Mode Activate",
                     "type": "Button",
                     "id": "a21db72c-4843-4839-b4d0-3ce8d287cb86",
@@ -516,6 +525,17 @@
                     "processors": "",
                     "groups": "Noncontinuous Move;Generic XR Controller",
                     "action": "Teleport Mode Activate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7f4f0f17-8910-4e52-a246-f2df4e13a86e",
+                    "path": "<XRController>{LeftHand}/gripPressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Generic XR Controller",
+                    "action": "Grab Move",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -877,6 +897,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Grab Move",
+                    "type": "Button",
+                    "id": "37907e6a-38f8-464c-b8bd-3dfbdea7e2cd",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Teleport Mode Activate",
                     "type": "Button",
                     "id": "a6c7231d-c55d-4dd4-9e87-877bb5522ef5",
@@ -988,6 +1017,17 @@
                     "processors": "",
                     "groups": "Generic XR Controller;Noncontinuous Move",
                     "action": "Teleport Mode Activate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f668229b-1d9c-48f0-8adf-9c79401f1bbd",
+                    "path": "<XRController>{RightHand}/gripPressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Generic XR Controller",
+                    "action": "Grab Move",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

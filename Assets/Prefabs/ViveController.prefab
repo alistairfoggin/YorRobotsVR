@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7449098272193995863}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Pivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,7 +47,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6379802509750803962}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ViveController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -133,10 +133,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4607115747358718685, guid: 8a0dd4971461df44a9408f98b1ae2d64,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 8a0dd4971461df44a9408f98b1ae2d64,
         type: 3}
       propertyPath: m_Name
       value: trackpad
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 8a0dd4971461df44a9408f98b1ae2d64,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -212,10 +222,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7852120648690462951, guid: 1b2e8c29ac239f342818c5a876b9a7b2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 1b2e8c29ac239f342818c5a876b9a7b2,
         type: 3}
       propertyPath: m_Name
       value: sys_button
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 1b2e8c29ac239f342818c5a876b9a7b2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -291,10 +311,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5355414026242248161, guid: 36469416d12784e49812e790a6bc097f,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 36469416d12784e49812e790a6bc097f,
         type: 3}
       propertyPath: m_Name
       value: button
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 36469416d12784e49812e790a6bc097f,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -370,10 +400,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -14811729423041810, guid: 8bc9ce415e51cac42bd9cae7afba9675,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 8bc9ce415e51cac42bd9cae7afba9675,
         type: 3}
       propertyPath: m_Name
       value: r_grip
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 8bc9ce415e51cac42bd9cae7afba9675,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -449,10 +489,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -285894967265851339, guid: 51dad0540363df64f8bcda870c65d183,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 51dad0540363df64f8bcda870c65d183,
         type: 3}
       propertyPath: m_Name
       value: trigger
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 51dad0540363df64f8bcda870c65d183,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -528,10 +578,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -3645046345323280006, guid: f48942d2ebe315d45b102ce5ebf083bf,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f48942d2ebe315d45b102ce5ebf083bf,
         type: 3}
       propertyPath: m_Name
       value: l_grip
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f48942d2ebe315d45b102ce5ebf083bf,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -611,6 +671,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: body
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 9ee950c9f006c1a409fbdefe9c4afa6b,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8844286427233730354, guid: 9ee950c9f006c1a409fbdefe9c4afa6b,
+        type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
