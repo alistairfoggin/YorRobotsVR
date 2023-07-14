@@ -55,4 +55,9 @@ public class InverseMapTracking : MonoBehaviour
             }
         }
     }
+
+    private void Update()
+    {
+        
+    }
 }

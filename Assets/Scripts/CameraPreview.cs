@@ -15,7 +15,8 @@ public class CameraPreview : MonoBehaviour
     void Start()
     {
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
-        m_Material = GetComponent<MeshRenderer>().material;
+        m_Material = new Material(Shader.Find("Shader Graphs/ProjectorImage"));
+        GetComponent<MeshRenderer>().material = m_Material;
 
         m_ROSConnection.Subscribe<ImageMsg>("/camera/image_raw", UpdateImage);
     }
@@ -26,8 +27,8 @@ public class CameraPreview : MonoBehaviour
         {
             m_Texture = new Texture2D((int)msg.width, (int)msg.height, TextureFormat.RGB24, true);
             m_Texture.wrapMode = TextureWrapMode.Clamp;
-            m_Texture.filterMode = FilterMode.Point;
-            m_Material.mainTexture = m_Texture;
+            m_Texture.filterMode = FilterMode.Trilinear;
+            m_Material.SetTexture("_Image", m_Texture);
         }
         else if (msg.width != m_Texture.width || msg.height != m_Texture.height)
         {
