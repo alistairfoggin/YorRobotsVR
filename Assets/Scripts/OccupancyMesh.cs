@@ -6,79 +6,104 @@ using System.Collections.Generic;
 using Unity.Robotics.ROSTCPConnector;
 using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 using UnityEngine;
+using Unity.Collections;
+using Unity.Jobs;
 
 public class OccupancyMesh : MonoBehaviour
 {
-    ROSConnection m_ROSConnection;
-    TFSystem m_TFSystem;
-
-    static sbyte[] grid = new sbyte[] { 0, 0,
-                                        0, 0 };
-
-    static OccupancyGridMsg staticMsg = new OccupancyGridMsg(new HeaderMsg(),
-        new MapMetaDataMsg(
-        new TimeMsg(), 1f, 2, 2, new PoseMsg()), grid);
-
-    Mesh m_Mesh;
-
-    List<Vector3> vertexBuffer;
-    List<Vector2> uvBuffer;
-    List<int> triBuffer;
+    MeshGenerator m_MeshGenerator;
 
     private OccupancyGridMsg m_Message;
     private float m_LastDrawingFrameTime;
-    [SerializeField]
-    private float wallHeight = 0.4f;
 
     // Start is called before the first frame update
     void Start()
+    {
+        m_MeshGenerator = MeshGenerator.GetOrCreateInstance();
+        GetComponent<MeshFilter>().mesh = m_MeshGenerator.mesh;
+        m_MeshGenerator.transformUpdateDelegate += UpdateTransform;
+    }
+
+    void UpdateTransform(Vector3 localPosition, Quaternion localRotation)
+    {
+        transform.localPosition = localPosition;
+        transform.localRotation = localRotation;
+    }
+}
+
+class MeshGenerator
+{
+    private static MeshGenerator meshGenerator;
+
+    private ROSConnection m_ROSConnection;
+    private TFSystem m_TFSystem;
+    private float m_LastDrawingFrameTime;
+
+    private List<Vector3> vertexBuffer;
+    private List<Vector2> uvBuffer;
+    private List<int> triBuffer;
+
+
+    public delegate void TransformUpdateDelegate(Vector3 localPosition, Quaternion localRotation);
+    public TransformUpdateDelegate transformUpdateDelegate;
+
+    public Mesh mesh { get; private set; }
+
+    public static MeshGenerator GetOrCreateInstance()
+    {
+        if (meshGenerator != null)
+        {
+            return meshGenerator;
+        }
+
+        meshGenerator = new MeshGenerator();
+        return meshGenerator;
+    }
+
+    private MeshGenerator()
     {
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
         m_ROSConnection.Subscribe<OccupancyGridMsg>("/map", UpdateMap);
 
         m_TFSystem = TFSystem.GetOrCreateInstance();
 
-        m_Mesh = new Mesh();
-        GetComponent<MeshFilter>().mesh = m_Mesh;
+        mesh = new Mesh();
 
         vertexBuffer = new List<Vector3>(201 * 201);
         uvBuffer = new List<Vector2>(201 * 201);
         triBuffer = new List<int>(200 * 200 * 6);
     }
 
-    void UpdateMap(OccupancyGridMsg occupancyGridMsg)
+    private void UpdateMap(OccupancyGridMsg occupancyGridMsg)
     {
-        m_Message = occupancyGridMsg;
-
         if (Time.time > m_LastDrawingFrameTime + 1)
-            Redraw();
+            RecalculateMap(occupancyGridMsg);
 
         m_LastDrawingFrameTime = Time.time;
     }
 
-    void Redraw()
+    private void RecalculateMap(OccupancyGridMsg msg)
     {
-        GenerateMesh();
+        GenerateMesh(msg);
 
-        Vector3 origin = m_Message.info.origin.position.From<FLU>();
-        Quaternion rotation = m_Message.info.origin.orientation.From<FLU>();
+        Vector3 origin = msg.info.origin.position.From<FLU>();
+        Quaternion rotation = msg.info.origin.orientation.From<FLU>();
         rotation.eulerAngles += new Vector3(0, -90, 0);
-        float scale = m_Message.info.resolution;
+        float scale = msg.info.resolution;
 
         // offset the mesh by half a grid square, because the message's position defines the CENTER of grid square 0,0
         Vector3 drawOrigin = origin - rotation * new Vector3(scale * 0.5f, 0, scale * 0.5f);
 
-        TFFrame tfFrame = m_TFSystem.GetTransform(m_Message.header);
+        TFFrame tfFrame = m_TFSystem.GetTransform(msg.header);
         drawOrigin = tfFrame.TransformPoint(drawOrigin);
         rotation = Quaternion.Euler(rotation.eulerAngles + tfFrame.rotation.eulerAngles);
 
-        transform.localPosition = drawOrigin;
-        transform.localRotation = rotation;
+        transformUpdateDelegate.Invoke(drawOrigin, rotation);
     }
 
-    void GenerateMesh()
+    private void GenerateMesh(OccupancyGridMsg msg)
     {
-        MapMetaDataMsg info = m_Message.info;
+        MapMetaDataMsg info = msg.info;
         vertexBuffer.Clear();
         vertexBuffer.Capacity = ((int)info.width + 1) * ((int)info.height + 1);
         uvBuffer.Clear();
@@ -94,12 +119,12 @@ public class OccupancyMesh : MonoBehaviour
                 Vector3 vertex = new Vector3(x * info.resolution, 0, y * info.resolution);
 
                 int threshold = 50;
-                if (x < info.width && y < info.height && m_Message.data[x + info.width * y] > threshold // Check upper right of vertex
-                    || (x > 0 && y < info.height && m_Message.data[x - 1 + info.width * y] > threshold) // Check upper left of vertex
-                    || (x < info.width && y > 0 && m_Message.data[x + info.width * (y - 1)] > threshold) // Check lower right of vertex
-                    || (x > 0 && y > 0 && m_Message.data[x - 1 + info.width * (y - 1)] > threshold)) // Check lower left of vertex
+                if (x < info.width && y < info.height && msg.data[x + info.width * y] > threshold // Check upper right of vertex
+                    || (x > 0 && y < info.height && msg.data[x - 1 + info.width * y] > threshold) // Check upper left of vertex
+                    || (x < info.width && y > 0 && msg.data[x + info.width * (y - 1)] > threshold) // Check lower right of vertex
+                    || (x > 0 && y > 0 && msg.data[x - 1 + info.width * (y - 1)] > threshold)) // Check lower left of vertex
                 {
-                    vertex.y = wallHeight;
+                    vertex.y = 0.4f;
                 }
 
                 vertexBuffer.Add(vertex);
@@ -118,10 +143,11 @@ public class OccupancyMesh : MonoBehaviour
             }
         }
 
-        m_Mesh.Clear();
-        m_Mesh.SetVertices(vertexBuffer);
-        m_Mesh.SetUVs(0, uvBuffer);
-        m_Mesh.SetTriangles(triBuffer, 0);
-        m_Mesh.RecalculateNormals();
+        mesh.Clear();
+        mesh.SetVertices(vertexBuffer);
+        mesh.SetUVs(0, uvBuffer);
+        mesh.SetTriangles(triBuffer, 0);
+        mesh.RecalculateNormals();
     }
+
 }

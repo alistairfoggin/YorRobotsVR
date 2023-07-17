@@ -1522,6 +1522,7 @@ MonoBehaviour:
   directControllerGameObject: {fileID: 0}
   teleportActivationReference: {fileID: -4084014799535200556, guid: c348712bda248c246b8c49b3db54643f,
     type: 3}
+  directActivationReference: {fileID: 0}
 --- !u!1 &717567416469024494
 GameObject:
   m_ObjectHideFlags: 0
@@ -2763,3 +2764,4 @@ MonoBehaviour:
   directControllerGameObject: {fileID: 0}
   teleportActivationReference: {fileID: -8270564778575511633, guid: c348712bda248c246b8c49b3db54643f,
     type: 3}
+  directActivationReference: {fileID: 0}
