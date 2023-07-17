@@ -84,6 +84,9 @@ public class OccupancyMesh : MonoBehaviour
         uvBuffer.Clear();
         uvBuffer.Capacity = ((int)info.width + 1) * ((int)info.height + 1);
 
+        triBuffer.Clear();
+        triBuffer.Capacity = ((int)info.width) * ((int)info.height) * 3 * 2;
+
         for (int y = 0; y <= info.height; y++)
         {
             for (int x = 0; x <= info.width; x++)
@@ -101,22 +104,17 @@ public class OccupancyMesh : MonoBehaviour
 
                 vertexBuffer.Add(vertex);
                 uvBuffer.Add(new Vector2(x / info.width, 1 - y / info.height));
-            }
-        }
 
-        triBuffer.Clear();
-        triBuffer.Capacity = ((int)info.width) * ((int)info.height) * 3 * 2;
-        for (int row = 0; row < info.height; row++)
-        {
-            for (int col = 0; col < info.width; col++)
-            {
-                triBuffer.Add((int)(col + row * (info.width + 1)));
-                triBuffer.Add((int)(col + (row + 1) * (info.width + 1)));
-                triBuffer.Add((int)(col + 1 + row * (info.width + 1)));
+                if (y < info.height && x < info.width)
+                {
+                    triBuffer.Add((int)(x + y * (info.width + 1)));
+                    triBuffer.Add((int)(x + (y + 1) * (info.width + 1)));
+                    triBuffer.Add((int)(x + 1 + y * (info.width + 1)));
 
-                triBuffer.Add((int)(col + (row + 1) * (info.width + 1)));
-                triBuffer.Add((int)(col + 1 + (row + 1) * (info.width + 1)));
-                triBuffer.Add((int)(col + 1 + row * (info.width + 1)));
+                    triBuffer.Add((int)(x + (y + 1) * (info.width + 1)));
+                    triBuffer.Add((int)(x + 1 + (y + 1) * (info.width + 1)));
+                    triBuffer.Add((int)(x + 1 + y * (info.width + 1)));
+                }
             }
         }
 
@@ -125,8 +123,5 @@ public class OccupancyMesh : MonoBehaviour
         m_Mesh.SetUVs(0, uvBuffer);
         m_Mesh.SetTriangles(triBuffer, 0);
         m_Mesh.RecalculateNormals();
-
-
-        print("Expected length: " + vertexBuffer.Capacity + " vs actual length: " + vertexBuffer.Count);
     }
 }
