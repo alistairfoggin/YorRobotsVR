@@ -3936,6 +3936,11 @@ PrefabInstance:
       propertyPath: shaderBoundsMaterial
       value: 
       objectReference: {fileID: 2100000, guid: b896cbc992dde284eaafbfc5c410709b, type: 2}
+    - target: {fileID: 5965485877081600011, guid: dfe9ed9791d998f4094537b741261c31,
+        type: 3}
+      propertyPath: m_MeshGenerator
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 5965485877081600014, guid: dfe9ed9791d998f4094537b741261c31,
         type: 3}
       propertyPath: m_LocalRotation.w
@@ -4271,6 +4276,11 @@ PrefabInstance:
       propertyPath: shaderBoundsMaterial
       value: 
       objectReference: {fileID: 2100000, guid: 092a9c30c06298d48ade9ec9ab0535d7, type: 2}
+    - target: {fileID: 5965485877081600011, guid: dfe9ed9791d998f4094537b741261c31,
+        type: 3}
+      propertyPath: m_MeshGenerator
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 5965485877081600014, guid: dfe9ed9791d998f4094537b741261c31,
         type: 3}
       propertyPath: m_LocalRotation.w
@@ -4394,6 +4404,11 @@ PrefabInstance:
         type: 3}
       propertyPath: wallHeight
       value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4577375781191064600, guid: c3588a7ecb7fb62428b79bff3cba1cf0,
+        type: 3}
+      propertyPath: m_MeshGenerator
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4577375781191064602, guid: c3588a7ecb7fb62428b79bff3cba1cf0,
         type: 3}

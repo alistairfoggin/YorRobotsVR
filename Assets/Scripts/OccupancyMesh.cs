@@ -1,25 +1,17 @@
-using RosMessageTypes.BuiltinInterfaces;
-using RosMessageTypes.Geometry;
 using RosMessageTypes.Nav;
-using RosMessageTypes.Std;
-using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Robotics.ROSTCPConnector;
 using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 using UnityEngine;
-using Unity.Collections;
-using Unity.Jobs;
 
 public class OccupancyMesh : MonoBehaviour
 {
-    MeshGenerator m_MeshGenerator;
-
-    private OccupancyGridMsg m_Message;
-    private float m_LastDrawingFrameTime;
+    OccupancyMeshGenerator m_MeshGenerator;
 
     // Start is called before the first frame update
     void Start()
     {
-        m_MeshGenerator = MeshGenerator.GetOrCreateInstance();
+        m_MeshGenerator = OccupancyMeshGenerator.GetOrCreateInstance();
         GetComponent<MeshFilter>().mesh = m_MeshGenerator.mesh;
         m_MeshGenerator.transformUpdateDelegate += UpdateTransform;
     }
@@ -31,36 +23,30 @@ public class OccupancyMesh : MonoBehaviour
     }
 }
 
-class MeshGenerator
+class OccupancyMeshGenerator
 {
-    private static MeshGenerator meshGenerator;
+    private static OccupancyMeshGenerator meshGenerator;
 
     private ROSConnection m_ROSConnection;
     private TFSystem m_TFSystem;
     private float m_LastDrawingFrameTime;
-
-    private List<Vector3> vertexBuffer;
-    private List<Vector2> uvBuffer;
-    private List<int> triBuffer;
 
 
     public delegate void TransformUpdateDelegate(Vector3 localPosition, Quaternion localRotation);
     public TransformUpdateDelegate transformUpdateDelegate;
 
     public Mesh mesh { get; private set; }
-
-    public static MeshGenerator GetOrCreateInstance()
+    public static OccupancyMeshGenerator GetOrCreateInstance()
     {
         if (meshGenerator != null)
         {
             return meshGenerator;
         }
-
-        meshGenerator = new MeshGenerator();
+        meshGenerator = new OccupancyMeshGenerator();
         return meshGenerator;
     }
 
-    private MeshGenerator()
+    private OccupancyMeshGenerator()
     {
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
         m_ROSConnection.Subscribe<OccupancyGridMsg>("/map", UpdateMap);
@@ -68,10 +54,6 @@ class MeshGenerator
         m_TFSystem = TFSystem.GetOrCreateInstance();
 
         mesh = new Mesh();
-
-        vertexBuffer = new List<Vector3>(201 * 201);
-        uvBuffer = new List<Vector2>(201 * 201);
-        triBuffer = new List<int>(200 * 200 * 6);
     }
 
     private void UpdateMap(OccupancyGridMsg occupancyGridMsg)
@@ -103,51 +85,55 @@ class MeshGenerator
 
     private void GenerateMesh(OccupancyGridMsg msg)
     {
-        MapMetaDataMsg info = msg.info;
-        vertexBuffer.Clear();
-        vertexBuffer.Capacity = ((int)info.width + 1) * ((int)info.height + 1);
-        uvBuffer.Clear();
-        uvBuffer.Capacity = ((int)info.width + 1) * ((int)info.height + 1);
+        int width = (int)msg.info.width;
+        int height = (int)msg.info.height;
+        float resolution = msg.info.resolution;
 
-        triBuffer.Clear();
-        triBuffer.Capacity = ((int)info.width) * ((int)info.height) * 3 * 2;
+        int numVertices = (width + 1) * (height + 1);
 
-        for (int y = 0; y <= info.height; y++)
+        NativeArray<Vector3> vertexBuffer = new NativeArray<Vector3>(numVertices, Allocator.Persistent);
+        NativeArray<Vector2> uvBuffer = new NativeArray<Vector2>(numVertices, Allocator.Persistent);
+        NativeArray<int> triangleBuffer = new NativeArray<int>(width * height * 6, Allocator.Persistent);
+        int i = 0;
+        for (int y = 0; y <= height; y++)
         {
-            for (int x = 0; x <= info.width; x++)
+            for (int x = 0; x <= width; x++)
             {
-                Vector3 vertex = new Vector3(x * info.resolution, 0, y * info.resolution);
+                Vector3 vertex = new Vector3(x * resolution, 0, y * resolution);
 
                 int threshold = 50;
-                if (x < info.width && y < info.height && msg.data[x + info.width * y] > threshold // Check upper right of vertex
-                    || (x > 0 && y < info.height && msg.data[x - 1 + info.width * y] > threshold) // Check upper left of vertex
-                    || (x < info.width && y > 0 && msg.data[x + info.width * (y - 1)] > threshold) // Check lower right of vertex
-                    || (x > 0 && y > 0 && msg.data[x - 1 + info.width * (y - 1)] > threshold)) // Check lower left of vertex
+                if (x < width && y < height && msg.data[x + width * y] > threshold // Check upper right of vertex
+                    || (x > 0 && y < height && msg.data[x - 1 + width * y] > threshold) // Check upper left of vertex
+                    || (x < width && y > 0 && msg.data[x + width * (y - 1)] > threshold) // Check lower right of vertex
+                    || (x > 0 && y > 0 && msg.data[x - 1 + width * (y - 1)] > threshold)) // Check lower left of vertex
                 {
                     vertex.y = 0.4f;
                 }
 
-                vertexBuffer.Add(vertex);
-                uvBuffer.Add(new Vector2(x / info.width, 1 - y / info.height));
+                vertexBuffer[x + y * (width + 1)] = vertex;
+                uvBuffer[x + y * (width + 1)] = new Vector2(x / width, 1 - y / height);
 
-                if (y < info.height && x < info.width)
+                if (y < height && x < width)
                 {
-                    triBuffer.Add((int)(x + y * (info.width + 1)));
-                    triBuffer.Add((int)(x + (y + 1) * (info.width + 1)));
-                    triBuffer.Add((int)(x + 1 + y * (info.width + 1)));
+                    triangleBuffer[6 * i] = x + y * (width + 1);
+                    triangleBuffer[6 * i + 1] = x + (y + 1) * (width + 1);
+                    triangleBuffer[6 * i + 2] = x + 1 + y * (width + 1);
 
-                    triBuffer.Add((int)(x + (y + 1) * (info.width + 1)));
-                    triBuffer.Add((int)(x + 1 + (y + 1) * (info.width + 1)));
-                    triBuffer.Add((int)(x + 1 + y * (info.width + 1)));
+                    triangleBuffer[6 * i + 3] = x + (y + 1) * (width + 1);
+                    triangleBuffer[6 * i + 4] = x + 1 + (y + 1) * (width + 1);
+                    triangleBuffer[6 * i + 5] = x + 1 + y * (width + 1);
+                    i++;
                 }
             }
         }
-
         mesh.Clear();
         mesh.SetVertices(vertexBuffer);
         mesh.SetUVs(0, uvBuffer);
-        mesh.SetTriangles(triBuffer, 0);
+        mesh.SetTriangles(triangleBuffer.ToArray(), 0);
         mesh.RecalculateNormals();
-    }
 
+        vertexBuffer.Dispose();
+        uvBuffer.Dispose();
+        triangleBuffer.Dispose();
+    }
 }
