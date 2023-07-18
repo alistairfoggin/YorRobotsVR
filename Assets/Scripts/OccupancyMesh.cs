@@ -1,5 +1,6 @@
 using RosMessageTypes.Nav;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Robotics.ROSTCPConnector;
 using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 using UnityEngine;
@@ -29,11 +30,15 @@ class OccupancyMeshGenerator
 
     private ROSConnection m_ROSConnection;
     private TFSystem m_TFSystem;
-    private float m_LastDrawingFrameTime;
-
+    private OccupancyGridMsg m_LastMsg;
 
     public delegate void TransformUpdateDelegate(Vector3 localPosition, Quaternion localRotation);
     public TransformUpdateDelegate transformUpdateDelegate;
+    private JobHandle? handle = null;
+    private NativeArray<sbyte> data;
+    private NativeArray<Vector3> vertexBuffer;
+    private NativeArray<Vector2> uvBuffer;
+    private NativeArray<int> triangleBuffer;
 
     public Mesh mesh { get; private set; }
     public static OccupancyMeshGenerator GetOrCreateInstance()
@@ -56,34 +61,44 @@ class OccupancyMeshGenerator
         mesh = new Mesh();
     }
 
-    private void UpdateMap(OccupancyGridMsg occupancyGridMsg)
-    {
-        if (Time.time > m_LastDrawingFrameTime + 1)
-            RecalculateMap(occupancyGridMsg);
 
-        m_LastDrawingFrameTime = Time.time;
+    private void UpdateMap(OccupancyGridMsg msg)
+    {
+        if (handle != null)
+        {
+            if (!handle.Value.IsCompleted) return;
+            handle.Value.Complete();
+            mesh.Clear();
+            mesh.SetVertices(vertexBuffer);
+            mesh.SetUVs(0, uvBuffer);
+            mesh.SetTriangles(triangleBuffer.ToArray(), 0);
+            mesh.RecalculateNormals();
+
+            vertexBuffer.Dispose();
+            uvBuffer.Dispose();
+            triangleBuffer.Dispose();
+            data.Dispose();
+
+            Vector3 origin = m_LastMsg.info.origin.position.From<FLU>();
+            Quaternion rotation = m_LastMsg.info.origin.orientation.From<FLU>();
+            rotation.eulerAngles += new Vector3(0, -90, 0);
+            float scale = m_LastMsg.info.resolution;
+
+            // offset the mesh by half a grid square, because the message's position defines the CENTER of grid square 0,0
+            Vector3 drawOrigin = origin - rotation * new Vector3(scale * 0.5f, 0, scale * 0.5f);
+
+            TFFrame tfFrame = m_TFSystem.GetTransform(m_LastMsg.header);
+            drawOrigin = tfFrame.TransformPoint(drawOrigin);
+            rotation = Quaternion.Euler(rotation.eulerAngles + tfFrame.rotation.eulerAngles);
+
+            transformUpdateDelegate.Invoke(drawOrigin, rotation);
+        }
+
+        StartGeneratingMesh(msg);
+        m_LastMsg = msg;
     }
 
-    private void RecalculateMap(OccupancyGridMsg msg)
-    {
-        GenerateMesh(msg);
-
-        Vector3 origin = msg.info.origin.position.From<FLU>();
-        Quaternion rotation = msg.info.origin.orientation.From<FLU>();
-        rotation.eulerAngles += new Vector3(0, -90, 0);
-        float scale = msg.info.resolution;
-
-        // offset the mesh by half a grid square, because the message's position defines the CENTER of grid square 0,0
-        Vector3 drawOrigin = origin - rotation * new Vector3(scale * 0.5f, 0, scale * 0.5f);
-
-        TFFrame tfFrame = m_TFSystem.GetTransform(msg.header);
-        drawOrigin = tfFrame.TransformPoint(drawOrigin);
-        rotation = Quaternion.Euler(rotation.eulerAngles + tfFrame.rotation.eulerAngles);
-
-        transformUpdateDelegate.Invoke(drawOrigin, rotation);
-    }
-
-    private void GenerateMesh(OccupancyGridMsg msg)
+    private void StartGeneratingMesh(OccupancyGridMsg msg)
     {
         int width = (int)msg.info.width;
         int height = (int)msg.info.height;
@@ -91,49 +106,71 @@ class OccupancyMeshGenerator
 
         int numVertices = (width + 1) * (height + 1);
 
-        NativeArray<Vector3> vertexBuffer = new NativeArray<Vector3>(numVertices, Allocator.Persistent);
-        NativeArray<Vector2> uvBuffer = new NativeArray<Vector2>(numVertices, Allocator.Persistent);
-        NativeArray<int> triangleBuffer = new NativeArray<int>(width * height * 6, Allocator.Persistent);
-        int i = 0;
-        for (int y = 0; y <= height; y++)
+        vertexBuffer = new NativeArray<Vector3>(numVertices, Allocator.Persistent);
+        uvBuffer = new NativeArray<Vector2>(numVertices, Allocator.Persistent);
+        triangleBuffer = new NativeArray<int>(width * height * 6, Allocator.Persistent);
+        data = new NativeArray<sbyte>(msg.data, Allocator.Persistent);
+
+        MeshGenerationJob job = new MeshGenerationJob
         {
-            for (int x = 0; x <= width; x++)
+            width = width,
+            height = height,
+            resolution = resolution,
+            data = data,
+            vertexBuffer = vertexBuffer,
+            uvBuffer = uvBuffer,
+            triangleBuffer = triangleBuffer
+        };
+        handle = job.Schedule();
+    }
+
+    struct MeshGenerationJob : IJob
+    {
+        public int height;
+        public int width;
+        public float resolution;
+
+        [ReadOnly]
+        public NativeArray<sbyte> data;
+
+        public NativeArray<Vector3> vertexBuffer;
+        public NativeArray<Vector2> uvBuffer;
+        public NativeArray<int> triangleBuffer;
+
+        public void Execute()
+        {
+            int i = 0;
+            for (int y = 0; y <= height; y++)
             {
-                Vector3 vertex = new Vector3(x * resolution, 0, y * resolution);
-
-                int threshold = 50;
-                if (x < width && y < height && msg.data[x + width * y] > threshold // Check upper right of vertex
-                    || (x > 0 && y < height && msg.data[x - 1 + width * y] > threshold) // Check upper left of vertex
-                    || (x < width && y > 0 && msg.data[x + width * (y - 1)] > threshold) // Check lower right of vertex
-                    || (x > 0 && y > 0 && msg.data[x - 1 + width * (y - 1)] > threshold)) // Check lower left of vertex
+                for (int x = 0; x <= width; x++)
                 {
-                    vertex.y = 0.4f;
-                }
+                    Vector3 vertex = new Vector3(x * resolution, 0, y * resolution);
 
-                vertexBuffer[x + y * (width + 1)] = vertex;
-                uvBuffer[x + y * (width + 1)] = new Vector2(x / width, 1 - y / height);
+                    int threshold = 50;
+                    if (x < width && y < height && data[x + width * y] > threshold // Check upper right of vertex
+                        || (x > 0 && y < height && data[x - 1 + width * y] > threshold) // Check upper left of vertex
+                        || (x < width && y > 0 && data[x + width * (y - 1)] > threshold) // Check lower right of vertex
+                        || (x > 0 && y > 0 && data[x - 1 + width * (y - 1)] > threshold)) // Check lower left of vertex
+                    {
+                        vertex.y = 0.4f;
+                    }
 
-                if (y < height && x < width)
-                {
-                    triangleBuffer[6 * i] = x + y * (width + 1);
-                    triangleBuffer[6 * i + 1] = x + (y + 1) * (width + 1);
-                    triangleBuffer[6 * i + 2] = x + 1 + y * (width + 1);
+                    vertexBuffer[x + y * (width + 1)] = vertex;
+                    uvBuffer[x + y * (width + 1)] = new Vector2(x / width, 1 - y / height);
 
-                    triangleBuffer[6 * i + 3] = x + (y + 1) * (width + 1);
-                    triangleBuffer[6 * i + 4] = x + 1 + (y + 1) * (width + 1);
-                    triangleBuffer[6 * i + 5] = x + 1 + y * (width + 1);
-                    i++;
+                    if (y < height && x < width)
+                    {
+                        triangleBuffer[6 * i] = x + y * (width + 1);
+                        triangleBuffer[6 * i + 1] = x + (y + 1) * (width + 1);
+                        triangleBuffer[6 * i + 2] = x + 1 + y * (width + 1);
+
+                        triangleBuffer[6 * i + 3] = x + (y + 1) * (width + 1);
+                        triangleBuffer[6 * i + 4] = x + 1 + (y + 1) * (width + 1);
+                        triangleBuffer[6 * i + 5] = x + 1 + y * (width + 1);
+                        i++;
+                    }
                 }
             }
         }
-        mesh.Clear();
-        mesh.SetVertices(vertexBuffer);
-        mesh.SetUVs(0, uvBuffer);
-        mesh.SetTriangles(triangleBuffer.ToArray(), 0);
-        mesh.RecalculateNormals();
-
-        vertexBuffer.Dispose();
-        uvBuffer.Dispose();
-        triangleBuffer.Dispose();
     }
 }

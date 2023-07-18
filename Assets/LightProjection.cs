@@ -11,7 +11,6 @@ public class LightProjection : MonoBehaviour
     ROSConnection m_ROSConnection;
     Light m_Light;
     Texture2D m_Texture;
-    float m_LastUpdatedTime;
     ImageMsg m_LastMsg;
     NativeArray<byte> pixels;
     JobHandle? handle = null;
@@ -56,7 +55,6 @@ public class LightProjection : MonoBehaviour
             pixels = pixels
         };
         handle = job.Schedule();
-        m_LastUpdatedTime = Time.time;
         m_LastMsg = msg;
     }
 
