@@ -40,7 +40,6 @@ class OccupancyMeshGenerator
     private NativeArray<Vector3> vertexBuffer;
     private NativeArray<Vector2> uvBuffer;
     private NativeList<int> triangleBuffer;
-    private float m_LastUpdatedTime = -1;
 
     public Mesh mesh { get; private set; }
     public static OccupancyMeshGenerator GetOrCreateInstance()
@@ -80,7 +79,6 @@ class OccupancyMeshGenerator
 
     private void UpdateMap(OccupancyGridMsg msg)
     {
-        if (Time.time == m_LastUpdatedTime) return;
         if (handle != null)
         {
             if (!handle.Value.IsCompleted) return;
@@ -114,7 +112,6 @@ class OccupancyMeshGenerator
 
         StartGeneratingMesh(msg);
         m_LastMsg = msg;
-        m_LastUpdatedTime = Time.time;
     }
 
     private void StartGeneratingMesh(OccupancyGridMsg msg)

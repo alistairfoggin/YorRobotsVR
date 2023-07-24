@@ -141,7 +141,7 @@ Material:
     - _QueueOffset: 0
     - _Radius: 0.5
     - _ReceiveShadows: 0
-    - _Rotation: -316.17877
+    - _Rotation: -315
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 5
@@ -154,7 +154,7 @@ Material:
     - _ZWrite: 1
     - _ZWriteControl: 1
     m_Colors:
-    - _Centre: {r: -0.004486868, g: 1.0578994, b: 1.5371424, a: 0}
+    - _Centre: {r: 0, g: 0.96181625, b: 1.2881838, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

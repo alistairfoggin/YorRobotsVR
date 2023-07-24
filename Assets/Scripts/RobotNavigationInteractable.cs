@@ -35,7 +35,7 @@ public class RobotNavigationInteractable : XRBaseInteractable
         m_ROSConnection.Publish(topicName, msg);
     }
 
-    protected override void OnActivated(ActivateEventArgs args)
+    protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
         if (args.interactorObject is XRRayInteractor)
         {
@@ -44,7 +44,7 @@ public class RobotNavigationInteractable : XRBaseInteractable
             Vector3 hitNormal;
             rayInteractor.TryGetHitInfo(out hitPosition, out hitNormal, out _, out _);
 
-            if (Vector3.Dot(hitNormal.normalized, Vector3.up) < 0.95f)
+            if (Vector3.Dot(hitNormal.normalized, transform.up) < 0.95f)
             {
                 return;
             }
@@ -66,16 +66,8 @@ public class RobotNavigationInteractable : XRBaseInteractable
                 destination = m_TFSystem.GetTransform("map", m_ROSTime.LatestTimeMsg).InverseTransformPoint(destination);
             }
             destination.y = 0;
+            print("x: "+ destination.x + ", y: " + destination);
             GoToPoint(destination);
-        }
-    }
-
-    protected override void OnSelectEntered(SelectEnterEventArgs args)
-    {
-        base.OnSelectEntered(args);
-        if (args.interactorObject is XRRayInteractor)
-        {
-            XRRayInteractor rayInteractor = (XRRayInteractor)args.interactorObject;
         }
     }
 }
