@@ -126,7 +126,7 @@ Material:
     - _CastShadows: 0
     - _Cull: 2
     - _Cutoff: 0.5
-    - _Depth: 1
+    - _Depth: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
     - _GlossMapScale: 1
@@ -141,19 +141,20 @@ Material:
     - _QueueOffset: 0
     - _Radius: 0.5
     - _ReceiveShadows: 0
+    - _Rotation: -316.17877
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 5
     - _Surface: 1
     - _UVSec: 0
     - _Use_Bounds: 1
-    - _Width: 0.5
+    - _Width: 1
     - _WorkflowMode: 1
     - _ZTest: 4
     - _ZWrite: 1
     - _ZWriteControl: 1
     m_Colors:
-    - _Centre: {r: 0.95, g: 0.07, b: 0, a: 0}
+    - _Centre: {r: -0.004486868, g: 1.0578994, b: 1.5371424, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

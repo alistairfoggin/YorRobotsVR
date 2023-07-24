@@ -4,7 +4,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Robotics.ROSTCPConnector;
 using UnityEngine;
-
+using UnityEngine.Rendering;
 
 public class LightProjection : MonoBehaviour
 {
@@ -14,6 +14,7 @@ public class LightProjection : MonoBehaviour
     ImageMsg m_LastMsg;
     NativeArray<byte> pixels;
     JobHandle? handle = null;
+    private float m_LastUpdatedTime = -1;
 
     // Start is called before the first frame update
     void Start()
@@ -26,6 +27,7 @@ public class LightProjection : MonoBehaviour
 
     private void UpdateImage(ImageMsg msg)
     {
+        if (Time.time == m_LastUpdatedTime) return;
         if (handle != null)
         {
             if (!handle.Value.IsCompleted) return;
@@ -56,6 +58,7 @@ public class LightProjection : MonoBehaviour
         };
         handle = job.Schedule();
         m_LastMsg = msg;
+        m_LastUpdatedTime = Time.time;
     }
 
     [BurstCompile(CompileSynchronously = true)]

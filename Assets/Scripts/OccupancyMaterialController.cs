@@ -16,6 +16,7 @@ public class OccupancyMaterialController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        shaderBoundsMaterial.SetVector("_Centre", new Vector2(centreTransform.position.x, centreTransform.position.z));
+        shaderBoundsMaterial.SetVector("_Centre", centreTransform.position);
+        shaderBoundsMaterial.SetFloat("_Rotation", -centreTransform.GetComponentInParent<Transform>().rotation.eulerAngles.x);
     }
 }

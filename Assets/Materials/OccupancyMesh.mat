@@ -34,17 +34,17 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: OccupancyMesh
-  m_Shader: {fileID: -6465566751694194690, guid: c708d4e4d6c6f6a4e9dc826b0113c15d,
+  m_Shader: {fileID: -6465566751694194690, guid: 5c3fb36be4225f54a8d6772c889bb853,
     type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
+  m_ValidKeywords: []
+  m_InvalidKeywords:
   - _ALPHATEST_ON
-  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: -1
   stringTagMap:
     RenderType: TransparentCutout
   disabledShaderPasses: []

@@ -70,4 +70,12 @@ public class RobotNavigationInteractable : XRBaseInteractable
         }
     }
 
+    protected override void OnSelectEntered(SelectEnterEventArgs args)
+    {
+        base.OnSelectEntered(args);
+        if (args.interactorObject is XRRayInteractor)
+        {
+            XRRayInteractor rayInteractor = (XRRayInteractor)args.interactorObject;
+        }
+    }
 }
