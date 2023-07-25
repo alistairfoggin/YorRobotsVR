@@ -23,28 +23,30 @@ public class LightProjection : MonoBehaviour
         m_ROSConnection.Subscribe<ImageMsg>("/camera/image_raw", UpdateImage);
     }
 
+    private void LateUpdate()
+    {
+        if (handle == null || !handle.Value.IsCompleted) return;
+        handle.Value.Complete();
+        if (m_Texture == null)
+        {
+            m_Texture = new Texture2D((int)m_LastMsg.width, (int)m_LastMsg.height, TextureFormat.RGB24, true);
+            m_Texture.wrapMode = TextureWrapMode.Clamp;
+            m_Texture.filterMode = FilterMode.Trilinear;
+            m_Light.cookie = m_Texture;
+        }
+        else if (m_LastMsg.width != m_Texture.width || m_LastMsg.height != m_Texture.height)
+        {
+            m_Texture.Reinitialize((int)m_LastMsg.width, (int)m_LastMsg.height);
+        }
+        m_Texture.SetPixelData(pixels, 0);
+        m_Texture.Apply();
+        pixels.Dispose();
+        handle = null;
+    }
+
     private void UpdateImage(ImageMsg msg)
     {
-        if (handle != null)
-        {
-            if (!handle.Value.IsCompleted) return;
-            handle.Value.Complete();
-            if (m_Texture == null)
-            {
-                m_Texture = new Texture2D((int)m_LastMsg.width, (int)m_LastMsg.height, TextureFormat.RGB24, true);
-                m_Texture.wrapMode = TextureWrapMode.Clamp;
-                m_Texture.filterMode = FilterMode.Trilinear;
-                m_Light.cookie = m_Texture;
-            }
-            else if (m_LastMsg.width != m_Texture.width || m_LastMsg.height != m_Texture.height)
-            {
-                m_Texture.Reinitialize((int)m_LastMsg.width, (int)m_LastMsg.height);
-            }
-            m_Texture.SetPixelData(pixels, 0);
-            m_Texture.Apply();
-            pixels.Dispose();
-        }
-
+        if (handle != null) return;
         pixels = new NativeArray<byte>(msg.data, Allocator.Persistent);
         FlipJob job = new FlipJob
         {
