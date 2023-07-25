@@ -66,7 +66,6 @@ public class RobotNavigationInteractable : XRBaseInteractable
                 destination = m_TFSystem.GetTransform("map", m_ROSTime.LatestTimeMsg).InverseTransformPoint(destination);
             }
             destination.y = 0;
-            print("x: "+ destination.x + ", y: " + destination);
             GoToPoint(destination);
         }
     }
