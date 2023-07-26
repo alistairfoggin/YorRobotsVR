@@ -29,7 +29,7 @@ public class LightProjection : MonoBehaviour
         handle.Value.Complete();
         if (m_Texture == null)
         {
-            m_Texture = new Texture2D((int)m_LastMsg.width, (int)m_LastMsg.height, TextureFormat.RGB24, true);
+            m_Texture = new Texture2D((int)m_LastMsg.width, (int)m_LastMsg.height, TextureFormat.RGB24, false);
             m_Texture.wrapMode = TextureWrapMode.Clamp;
             m_Texture.filterMode = FilterMode.Trilinear;
             m_Light.cookie = m_Texture;
@@ -39,7 +39,7 @@ public class LightProjection : MonoBehaviour
             m_Texture.Reinitialize((int)m_LastMsg.width, (int)m_LastMsg.height);
         }
         m_Texture.SetPixelData(pixels, 0);
-        m_Texture.Apply();
+        m_Texture.Apply(false);
         pixels.Dispose();
         handle = null;
     }

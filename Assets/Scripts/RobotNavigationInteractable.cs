@@ -1,10 +1,10 @@
 using RosMessageTypes.BuiltinInterfaces;
 using RosMessageTypes.Geometry;
 using RosMessageTypes.Std;
-using System;
 using Unity.Robotics.ROSTCPConnector;
 using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit;
 
 public class RobotNavigationInteractable : XRBaseInteractable
@@ -17,32 +17,58 @@ public class RobotNavigationInteractable : XRBaseInteractable
     }
 
     MapControlMode mapControlMode = MapControlMode.Destination;
-    public void SetDestinationControl() { mapControlMode = MapControlMode.Destination; }
-    public void SetMoveControl() { mapControlMode = MapControlMode.Move; }
-    public void SetRotateControl() { mapControlMode = MapControlMode.Rotate; }
+
+    [SerializeField]
+    Sprite m_DestinationSprite;
+    [SerializeField]
+    Sprite m_MoveSprite;
+    [SerializeField]
+    Sprite m_RotateSprite;
+    [SerializeField]
+    Image m_ControllerImage;
+    public void SetDestinationControl()
+    {
+        mapControlMode = MapControlMode.Destination;
+        m_ControllerImage.sprite = m_DestinationSprite;
+    }
+    public void SetMoveControl()
+    {
+        mapControlMode = MapControlMode.Move;
+        m_ControllerImage.sprite = m_MoveSprite;
+    }
+    public void SetRotateControl()
+    {
+        mapControlMode = MapControlMode.Rotate;
+        m_ControllerImage.sprite = m_RotateSprite;
+    }
 
     ROSConnection m_ROSConnection;
     ROSTime m_ROSTime;
     TFSystem m_TFSystem;
-    public string topicName = "/goal_pose";
+    public string TopicName = "/goal_pose";
 
-    XRRayInteractor rayInteractor;
-    Vector3 attachOffet;
-    float offsetAngle;
+    XRRayInteractor m_RayInteractor;
+    Vector3 m_AttachOffet;
+    float m_OffsetAngle;
 
     [SerializeField]
-    Transform mapCentreTransform;
+    Transform m_MapCentreTransform;
     [SerializeField]
-    Transform robotWorldWrapperTransform;
+    Transform m_RobotWorldWrapperTransform;
+    [SerializeField]
+    GameObject m_DirectionIndicator;
+    private Vector3 m_IndicatorOffset;
 
     private void Start()
     {
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
-        m_ROSConnection.RegisterPublisher<PoseStampedMsg>(topicName);
+        m_ROSConnection.RegisterPublisher<PoseStampedMsg>(TopicName);
 
         m_ROSTime = ROSTime.GetOrCreateInstance();
 
         m_TFSystem = TFSystem.GetOrCreateInstance();
+
+        m_IndicatorOffset = m_DirectionIndicator.transform.position - transform.position;
     }
 
     public void GoToPoint(Vector3 goal)
@@ -51,14 +77,14 @@ public class RobotNavigationInteractable : XRBaseInteractable
             new HeaderMsg(new TimeMsg(), "map"),
             new PoseMsg(goal.To<FLU>(), new QuaternionMsg()));
 
-        m_ROSConnection.Publish(topicName, msg);
+        m_ROSConnection.Publish(TopicName, msg);
     }
 
     protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
         if (args.interactorObject is XRRayInteractor)
         {
-            rayInteractor = (XRRayInteractor)args.interactorObject;
+            m_RayInteractor = (XRRayInteractor)args.interactorObject;
             switch (mapControlMode)
             {
                 case MapControlMode.Destination:
@@ -76,14 +102,15 @@ public class RobotNavigationInteractable : XRBaseInteractable
 
     protected override void OnSelectExited(SelectExitEventArgs args)
     {
-        rayInteractor = null;
+        m_RayInteractor = null;
+        m_DirectionIndicator.SetActive(false);
     }
 
     private void OnDestinationSelect()
     {
         Vector3 hitPosition;
         Vector3 hitNormal;
-        rayInteractor.TryGetHitInfo(out hitPosition, out hitNormal, out _, out _);
+        m_RayInteractor.TryGetHitInfo(out hitPosition, out hitNormal, out _, out _);
 
         if (Vector3.Dot(hitNormal.normalized, transform.up) < 0.95f)
         {
@@ -91,10 +118,10 @@ public class RobotNavigationInteractable : XRBaseInteractable
         }
 
         Vector3 destination;
-        if (mapCentreTransform != null)
+        if (m_MapCentreTransform != null)
         {
-            destination = mapCentreTransform.InverseTransformPoint(hitPosition);
-            destination.Scale(mapCentreTransform.GetComponentInParent<Transform>().localScale);
+            destination = m_MapCentreTransform.InverseTransformPoint(hitPosition);
+            destination.Scale(m_MapCentreTransform.GetComponentInParent<Transform>().localScale);
         }
         else
         {
@@ -112,39 +139,41 @@ public class RobotNavigationInteractable : XRBaseInteractable
     private void OnMoveSelectEntered()
     {
         RaycastHit hit;
-        rayInteractor.TryGetCurrent3DRaycastHit(out hit);
-        attachOffet = hit.point - robotWorldWrapperTransform.position;
+        m_RayInteractor.TryGetCurrent3DRaycastHit(out hit);
+        m_AttachOffet = hit.point - m_RobotWorldWrapperTransform.position;
     }
 
     private void OnRotateSelectEntered()
     {
+        m_DirectionIndicator.transform.position = transform.position + m_IndicatorOffset;
+        m_DirectionIndicator.SetActive(true);
         RaycastHit hit;
-        rayInteractor.TryGetCurrent3DRaycastHit(out hit);
-        attachOffet = hit.point - robotWorldWrapperTransform.position;
-        offsetAngle = Vector3.SignedAngle(robotWorldWrapperTransform.forward, attachOffet.normalized, robotWorldWrapperTransform.up);
+        m_RayInteractor.TryGetCurrent3DRaycastHit(out hit);
+        m_AttachOffet = hit.point - transform.position;
+        m_OffsetAngle = Vector3.SignedAngle(m_RobotWorldWrapperTransform.forward, m_AttachOffet.normalized, m_RobotWorldWrapperTransform.up);
     }
 
     public override void ProcessInteractable(XRInteractionUpdateOrder.UpdatePhase updatePhase)
     {
         if (updatePhase != XRInteractionUpdateOrder.UpdatePhase.Dynamic) { return; }
 
-        if (mapControlMode == MapControlMode.Move && rayInteractor != null)
+        if (mapControlMode == MapControlMode.Move && m_RayInteractor != null)
         {
             RaycastHit hit;
-            if (rayInteractor.TryGetCurrent3DRaycastHit(out hit) && hit.collider.gameObject.layer == LayerMask.NameToLayer("Robot"))
+            if (m_RayInteractor.TryGetCurrent3DRaycastHit(out hit) && hit.collider.gameObject.layer == LayerMask.NameToLayer("Robot"))
             {
-                robotWorldWrapperTransform.position = hit.point - attachOffet;
+                m_RobotWorldWrapperTransform.position = hit.point - m_AttachOffet;
             }
         }
-        else if (mapControlMode == MapControlMode.Rotate && rayInteractor != null)
+        else if (mapControlMode == MapControlMode.Rotate && m_RayInteractor != null)
         {
             RaycastHit hit;
-            if (rayInteractor.TryGetCurrent3DRaycastHit(out hit) && hit.collider.gameObject.layer == LayerMask.NameToLayer("Robot"))
+            if (m_RayInteractor.TryGetCurrent3DRaycastHit(out hit) && hit.collider.gameObject.layer == LayerMask.NameToLayer("Robot"))
             {
-                Vector3 newOffset = hit.point - robotWorldWrapperTransform.position;
-                float newOffsetAngle = Vector3.SignedAngle(robotWorldWrapperTransform.forward, newOffset.normalized, robotWorldWrapperTransform.up);
-                float deltaRotation = newOffsetAngle - offsetAngle;
-                robotWorldWrapperTransform.RotateAround(transform.position, transform.up, deltaRotation);
+                Vector3 newOffset = hit.point - transform.position;
+                float newOffsetAngle = Vector3.SignedAngle(m_RobotWorldWrapperTransform.forward, newOffset.normalized, m_RobotWorldWrapperTransform.up);
+                float deltaRotation = newOffsetAngle - m_OffsetAngle;
+                m_RobotWorldWrapperTransform.RotateAround(transform.position, transform.up, deltaRotation);
             }
         }
     }
