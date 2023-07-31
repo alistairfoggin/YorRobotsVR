@@ -25,6 +25,7 @@ public class LoggersUIController : MonoBehaviour
         m_ToggleGroup = GetComponent<ToggleGroup>();
         m_Loggers = new Dictionary<string, LoggerSource>();
         m_LoggerToggles = new Dictionary<string, LoggerSourceToggle>();
+        m_LoggerSourceController.gameObject.SetActive(false);
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
         m_ROSConnection.Subscribe<LogMsg>("/rosout", AddLog);
     }
@@ -42,11 +43,17 @@ public class LoggersUIController : MonoBehaviour
             toggle.SetLogger(this, logger, m_ToggleGroup);
             m_LoggerToggles.Add(msg.name, toggle);
         }
+        logger.AddLog(msg);
+
+        // Update UI after update
         if (m_LoggerToggles.TryGetValue(msg.name, out toggle))
         {
             toggle.UpdateLabels();
         }
-        logger.AddLog(msg);
+        if (m_LoggerSourceController.GetSource() == logger)
+        {
+            m_LoggerSourceController.UpdateUI();
+        }
     }
 
     public void SetToggle(LoggerSource source, bool value)

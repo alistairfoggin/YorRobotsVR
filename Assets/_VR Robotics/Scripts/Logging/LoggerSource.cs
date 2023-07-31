@@ -21,6 +21,8 @@ public class LoggerSource
     {
         Name = name;
 
+        NumLogs = 0;
+
         m_LogsByLevel = new Dictionary<LogLevel, Queue<LogMsg>>();
         m_LogsByLevel.Add(LogLevel.DEBUG, new Queue<LogMsg>(5));
         m_LogsByLevel.Add(LogLevel.INFO, new Queue<LogMsg>(5));
@@ -35,6 +37,7 @@ public class LoggerSource
         Queue<LogMsg> queue;
         if (!m_LogsByLevel.TryGetValue((LogLevel)msg.level, out queue))
         {
+            Debug.LogWarning("Attempted to save log with unknown log level: " + msg.level + ". (" + msg.msg + ")");
             return false;
         }
         // Limit number of logs maintained

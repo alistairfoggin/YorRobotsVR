@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using RosMessageTypes.RclInterfaces;
-using UnityEngine;
+﻿using RosMessageTypes.RclInterfaces;
 using TMPro;
+using UnityEngine;
 
 class LogMsgListItem : MonoBehaviour
 {
-    public LoggerSourceUIController LoggerSourceUIController { get; set; }
+    public LoggerSourceUIController UIController { get; set; }
 
     [SerializeField]
     TextMeshProUGUI m_MsgTextUI;
     [SerializeField]
     TextMeshProUGUI m_MsgTimeUI;
 
+    public LogMsg Message { get => m_LogMsg; }
     private LogMsg m_LogMsg;
 
 
@@ -20,18 +19,11 @@ class LogMsgListItem : MonoBehaviour
     {
         m_LogMsg = msg;
         m_MsgTextUI.SetText(m_LogMsg.msg);
-        m_MsgTimeUI.SetText(GetTimeString(m_LogMsg.stamp.sec));
+        m_MsgTimeUI.SetText(LoggerSourceUIController.GetTimeString(m_LogMsg.stamp.sec));
     }
 
     public void SetToggleValue(bool value)
     {
-        LoggerSourceUIController.SelectMessage(m_LogMsg);
-    }
-
-    private string GetTimeString(int timeInSeconds)
-    {
-        TimeSpan time = TimeSpan.FromSeconds(timeInSeconds);
-
-        return time.ToString(@"hh\:mm\:ss\:fff");
+        if (value) UIController.SelectMessage(m_LogMsg);
     }
 }
