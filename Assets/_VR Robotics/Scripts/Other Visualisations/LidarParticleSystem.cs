@@ -5,6 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(ParticleSystem))]
 public class LidarParticleSystem : MonoBehaviour
 {
+    [SerializeField]
+    private string m_LidarTopic = "/scan";
+
     private ROSConnection m_RosConnection;
     private TFSystem m_TFSystem;
     private ParticleSystem m_ParticleSystem;
@@ -14,7 +17,7 @@ public class LidarParticleSystem : MonoBehaviour
     void Start()
     {
         m_RosConnection = ROSConnection.GetOrCreateInstance();
-        m_RosConnection.Subscribe<LaserScanMsg>("/scan", LaserScanChange);
+        m_RosConnection.Subscribe<LaserScanMsg>(m_LidarTopic, LaserScanChange);
 
         m_TFSystem = TFSystem.GetOrCreateInstance();
 

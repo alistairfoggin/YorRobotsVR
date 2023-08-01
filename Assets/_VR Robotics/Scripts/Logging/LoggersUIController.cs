@@ -50,7 +50,7 @@ public class LoggersUIController : MonoBehaviour
         {
             toggle.UpdateLabels();
         }
-        if (m_LoggerSourceController.GetSource() == logger)
+        if (m_LoggerSourceController.gameObject.activeInHierarchy && m_LoggerSourceController.GetSource() == logger)
         {
             m_LoggerSourceController.UpdateUI();
         }

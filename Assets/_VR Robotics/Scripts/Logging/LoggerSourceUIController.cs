@@ -11,23 +11,20 @@ class LoggerSourceUIController : MonoBehaviour
     [SerializeField]
     private ToggleGroup m_MessageToggleGroup;
     [SerializeField]
-    private List<LogMsgListItem> m_LogMsgListItems;
+    private LogMsgListItem m_ListItemPrefab;
 
     [SerializeField]
     private TextMeshProUGUI m_MsgLabel;
     [SerializeField]
     private TextMeshProUGUI m_SourceLabel;
 
+    private List<LogMsgListItem> m_LogMsgListItems = new List<LogMsgListItem>();
     private LoggerSource m_LoggerSource;
     private LoggerSource.LogLevel m_LogLevel = LoggerSource.LogLevel.INFO;
     private LogMsg m_LogMsg;
 
     private void Start()
     {
-        foreach (LogMsgListItem listItem in m_LogMsgListItems)
-        {
-            listItem.UIController = this;
-        }
         m_MsgLabel.SetText("");
         m_SourceLabel.SetText("");
     }
@@ -60,6 +57,21 @@ class LoggerSourceUIController : MonoBehaviour
                 listItem.gameObject.SetActive(true);
                 listItem.SetLogMessage(logMsgs[i]);
                 listItem.GetComponent<Toggle>().isOn = listItem.Message == m_LogMsg;
+            }
+        }
+        if (logMsgs.Length > m_LogMsgListItems.Count)
+        {
+            for (int i = m_LogMsgListItems.Count; i < logMsgs.Length; i++)
+            {
+                LogMsgListItem listItem = Instantiate(m_ListItemPrefab);
+                listItem.gameObject.SetActive(true);
+                listItem.transform.SetParent(m_MessageToggleGroup.transform, false);
+                listItem.UIController = this;
+                listItem.SetLogMessage(logMsgs[i]);
+                Toggle listItemToggle = listItem.GetComponent<Toggle>();
+                listItemToggle.group = m_MessageToggleGroup;
+                listItemToggle.isOn = false;
+                m_LogMsgListItems.Add(listItem);
             }
         }
 

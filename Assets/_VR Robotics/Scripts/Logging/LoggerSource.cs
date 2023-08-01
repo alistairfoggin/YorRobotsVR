@@ -41,7 +41,7 @@ public class LoggerSource
             return false;
         }
         // Limit number of logs maintained
-        if (queue.Count == 5)
+        if (queue.Count == 20)
         {
             queue.Dequeue();
         }

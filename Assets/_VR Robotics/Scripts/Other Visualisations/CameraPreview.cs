@@ -21,7 +21,7 @@ public class CameraPreview : MonoBehaviour
     {
         if (m_Texture == null)
         {
-            m_Texture = new Texture2D((int)msg.width, (int)msg.height, TextureFormat.RGB24, true);
+            m_Texture = new Texture2D((int)msg.width, (int)msg.height, TextureFormat.RGB24, false);
             m_Texture.wrapMode = TextureWrapMode.Clamp;
             m_Texture.filterMode = FilterMode.Trilinear;
             m_Material.mainTexture = m_Texture;
@@ -32,6 +32,6 @@ public class CameraPreview : MonoBehaviour
         }
 
         m_Texture.SetPixelData(msg.data, 0);
-        m_Texture.Apply();
+        m_Texture.Apply(false);
     }
 }
