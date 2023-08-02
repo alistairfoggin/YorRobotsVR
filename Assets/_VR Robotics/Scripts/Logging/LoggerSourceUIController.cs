@@ -18,6 +18,17 @@ class LoggerSourceUIController : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI m_SourceLabel;
 
+    [SerializeField]
+    private TextMeshProUGUI m_DebugCountLabel;
+    [SerializeField]
+    private TextMeshProUGUI m_InfoCountLabel;
+    [SerializeField]
+    private TextMeshProUGUI m_WarnCountLabel;
+    [SerializeField]
+    private TextMeshProUGUI m_ErrorCountLabel;
+    [SerializeField]
+    private TextMeshProUGUI m_FatalCountLabel;
+
     private List<LogMsgListItem> m_LogMsgListItems = new List<LogMsgListItem>();
     private LoggerSource m_LoggerSource;
     private LoggerSource.LogLevel m_LogLevel = LoggerSource.LogLevel.INFO;
@@ -43,6 +54,12 @@ class LoggerSourceUIController : MonoBehaviour
 
     public void UpdateUI()
     {
+        m_DebugCountLabel.SetText(m_LoggerSource.GetLogsForLevel(LoggerSource.LogLevel.DEBUG).Count.ToString());
+        m_InfoCountLabel.SetText(m_LoggerSource.GetLogsForLevel(LoggerSource.LogLevel.INFO).Count.ToString());
+        m_WarnCountLabel.SetText(m_LoggerSource.GetLogsForLevel(LoggerSource.LogLevel.WARN).Count.ToString());
+        m_ErrorCountLabel.SetText(m_LoggerSource.GetLogsForLevel(LoggerSource.LogLevel.ERROR).Count.ToString());
+        m_FatalCountLabel.SetText(m_LoggerSource.GetLogsForLevel(LoggerSource.LogLevel.FATAL).Count.ToString());
+
         LogMsg[] logMsgs = m_LoggerSource.GetLogsForLevel(m_LogLevel).ToArray();
         for (int i = 0; i < m_LogMsgListItems.Count; i++)
         {

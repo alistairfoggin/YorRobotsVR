@@ -74,7 +74,7 @@ public class RobotNavigationInteractable : XRBaseInteractable
     public void GoToPoint(Vector3 goal)
     {
         PoseStampedMsg msg = new PoseStampedMsg(
-            new HeaderMsg(new TimeMsg(), "map"),
+            new HeaderMsg(m_ROSTime.LatestTimeMsg, "map"),
             new PoseMsg(goal.To<FLU>(), new QuaternionMsg()));
 
         m_ROSConnection.Publish(TopicName, msg);

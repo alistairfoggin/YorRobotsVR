@@ -6,7 +6,7 @@ public class ROSTime
 {
     private static ROSTime instance;
 
-    private TimeMsg m_TimeMsg;
+    private TimeMsg m_TimeMsg = new TimeMsg();
 
     private ROSTime()
     {
