@@ -4,7 +4,7 @@ using Unity.Robotics.ROSTCPConnector;
 using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 using UnityEngine;
 
-public class TurtleBotTracking : MonoBehaviour
+public class TurtlebotTracking : MonoBehaviour
 {
     private ROSConnection m_RosConnection;
     private TFSystem m_TFSystem;

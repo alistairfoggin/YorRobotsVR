@@ -14,6 +14,7 @@ public class GoalPosePosition : MonoBehaviour
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
         m_ROSConnection.Subscribe<PoseStampedMsg>("/goal_pose", UpdatePosition);
 
+
         m_TFSystem = TFSystem.GetOrCreateInstance();
     }
 
