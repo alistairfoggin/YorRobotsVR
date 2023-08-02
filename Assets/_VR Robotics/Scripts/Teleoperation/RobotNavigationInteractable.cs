@@ -58,26 +58,18 @@ public class RobotNavigationInteractable : XRBaseInteractable
     [SerializeField]
     GameObject m_DirectionIndicator;
     private Vector3 m_IndicatorOffset;
+    [SerializeField]
+    private TeleoperationController m_TeleoperationController;
 
     private void Start()
     {
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
-        m_ROSConnection.RegisterPublisher<PoseStampedMsg>(TopicName);
 
         m_ROSTime = ROSTime.GetOrCreateInstance();
 
         m_TFSystem = TFSystem.GetOrCreateInstance();
 
         m_IndicatorOffset = m_DirectionIndicator.transform.position - transform.position;
-    }
-
-    public void GoToPoint(Vector3 goal)
-    {
-        PoseStampedMsg msg = new PoseStampedMsg(
-            new HeaderMsg(m_ROSTime.LatestTimeMsg, "map"),
-            new PoseMsg(goal.To<FLU>(), new QuaternionMsg()));
-
-        m_ROSConnection.Publish(TopicName, msg);
     }
 
     protected override void OnSelectEntered(SelectEnterEventArgs args)
@@ -134,7 +126,7 @@ public class RobotNavigationInteractable : XRBaseInteractable
             destination = m_TFSystem.GetTransform("map", m_ROSTime.LatestTimeMsg).InverseTransformPoint(destination);
         }
         destination.y = 0;
-        GoToPoint(destination);
+        m_TeleoperationController.GoToPoint(destination);
     }
     private void OnMoveSelectEntered()
     {

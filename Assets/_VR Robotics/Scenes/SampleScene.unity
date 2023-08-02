@@ -473,7 +473,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33f4c8f65b8dc504a9cb708ea8e548c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wallHeight: 0.4
 --- !u!114 &599916909
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -486,8 +485,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 327b86e9b55b7104cb0c7ea1b50183f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 2
-  useBounds: 1
+  shaderBoundsMaterial: {fileID: 0}
   centreTransform: {fileID: 2030885420}
 --- !u!1 &636262820
 GameObject:
@@ -549,6 +547,7 @@ GameObject:
   m_Component:
   - component: {fileID: 705507995}
   - component: {fileID: 705507994}
+  - component: {fileID: 705507996}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -633,6 +632,29 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &705507996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 705507993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_RenderingLayers: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_ShadowRenderingLayers: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
 --- !u!1 &782785033
 GameObject:
   m_ObjectHideFlags: 0
@@ -681,6 +703,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   trackOrientation: 0
   trackPosition: 1
+  rotationFix: 0
+  isMinimap: 1
 --- !u!1 &894171201
 GameObject:
   m_ObjectHideFlags: 0
@@ -1648,8 +1672,14 @@ MonoBehaviour:
   m_OnDeactivate:
     m_PersistentCalls:
       m_Calls: []
-  topicName: /goal_pose
-  mapCentreTransform: {fileID: 0}
+  m_DestinationSprite: {fileID: 0}
+  m_MoveSprite: {fileID: 0}
+  m_RotateSprite: {fileID: 0}
+  m_ControllerImage: {fileID: 0}
+  TopicName: /goal_pose
+  m_MapCentreTransform: {fileID: 0}
+  m_RobotWorldWrapperTransform: {fileID: 0}
+  m_DirectionIndicator: {fileID: 0}
 --- !u!64 &1791149990
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1860,7 +1890,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1980,8 +2010,14 @@ MonoBehaviour:
   m_OnDeactivate:
     m_PersistentCalls:
       m_Calls: []
-  topicName: /goal_pose
-  mapCentreTransform: {fileID: 782785034}
+  m_DestinationSprite: {fileID: 0}
+  m_MoveSprite: {fileID: 0}
+  m_RotateSprite: {fileID: 0}
+  m_ControllerImage: {fileID: 0}
+  TopicName: /goal_pose
+  m_MapCentreTransform: {fileID: 0}
+  m_RobotWorldWrapperTransform: {fileID: 0}
+  m_DirectionIndicator: {fileID: 0}
 --- !u!1 &2071904536 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3903283394333637724, guid: e2a23f6997d85554c8b1eaf078f68ac7,

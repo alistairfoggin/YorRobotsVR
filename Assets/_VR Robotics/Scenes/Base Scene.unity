@@ -10981,6 +10981,11 @@ PrefabInstance:
       propertyPath: m_LocalScale.x
       value: 1.6
       objectReference: {fileID: 0}
+    - target: {fileID: 4047592969753448951, guid: d5db26b64558ddf43a0efdc6c62057b3,
+        type: 3}
+      propertyPath: m_TeleoperationController
+      value: 
+      objectReference: {fileID: 6081689965152302634}
     - target: {fileID: 4376233246271518575, guid: d5db26b64558ddf43a0efdc6c62057b3,
         type: 3}
       propertyPath: moveWithTransform
@@ -11653,7 +11658,7 @@ PrefabInstance:
     - target: {fileID: 6081689966474495759, guid: bc06c4ffc59e83146b188fdd3c1836fe,
         type: 3}
       propertyPath: m_Name
-      value: Direct Movement Controller
+      value: Teleoperation Controller
       objectReference: {fileID: 0}
     - target: {fileID: 6081689966474495759, guid: bc06c4ffc59e83146b188fdd3c1836fe,
         type: 3}

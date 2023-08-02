@@ -1,12 +1,16 @@
+using RosMessageTypes.BuiltinInterfaces;
 using RosMessageTypes.Geometry;
+using RosMessageTypes.Std;
 using Unity.Robotics.ROSTCPConnector;
+using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class CmdVelController : MonoBehaviour
+public class TeleoperationController : MonoBehaviour
 {
     ROSConnection m_RosConnection;
-    public string topicName = "/cmd_vel";
+    public string DirectMovementTopicName = "/cmd_vel";
+    public string GoalPoseTopicName = "/goal_pose";
     [SerializeField]
     float movementSpeed = 0.2f;
     [SerializeField]
@@ -23,7 +27,8 @@ public class CmdVelController : MonoBehaviour
     void Start()
     {
         m_RosConnection = ROSConnection.GetOrCreateInstance();
-        m_RosConnection.RegisterPublisher<TwistMsg>(topicName);
+        m_RosConnection.RegisterPublisher<TwistMsg>(DirectMovementTopicName);
+        m_RosConnection.RegisterPublisher<PoseStampedMsg>(GoalPoseTopicName);
 
         movement.action.performed += MovementPerformed;
     }
@@ -36,6 +41,7 @@ public class CmdVelController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // TODO: refactor to not always publish
         timePassed += Time.deltaTime;
         if (timePassed > messageDelay)
         {
@@ -43,9 +49,17 @@ public class CmdVelController : MonoBehaviour
                 new Vector3Msg(input.y * movementSpeed, 0, 0),
                 new Vector3Msg(0, 0, -input.x * turningSpeed));
 
-            m_RosConnection.Publish(topicName, msg);
+            m_RosConnection.Publish(DirectMovementTopicName, msg);
             timePassed = 0;
         }
+    }
+    public void GoToPoint(Vector3 goal)
+    {
+        PoseStampedMsg msg = new PoseStampedMsg(
+            new HeaderMsg(new TimeMsg(), "map"),
+            new PoseMsg(goal.To<FLU>(), new QuaternionMsg()));
+
+        m_RosConnection.Publish(GoalPoseTopicName, msg);
     }
 
     public void UpdateForwardsMovement(float y)
