@@ -42,8 +42,6 @@ public class RobotNavigationInteractable : XRBaseInteractable
         m_ControllerImage.sprite = m_RotateSprite;
     }
 
-    ROSConnection m_ROSConnection;
-    ROSTime m_ROSTime;
     TFSystem m_TFSystem;
     public string TopicName = "/goal_pose";
 
@@ -63,10 +61,6 @@ public class RobotNavigationInteractable : XRBaseInteractable
 
     private void Start()
     {
-        m_ROSConnection = ROSConnection.GetOrCreateInstance();
-
-        m_ROSTime = ROSTime.GetOrCreateInstance();
-
         m_TFSystem = TFSystem.GetOrCreateInstance();
 
         m_IndicatorOffset = m_DirectionIndicator.transform.position - transform.position;
@@ -121,10 +115,7 @@ public class RobotNavigationInteractable : XRBaseInteractable
             destination.Scale(transform.localScale);
         }
 
-        if (m_ROSTime.LatestTimeMsg != null)
-        {
-            destination = m_TFSystem.GetTransform("map", m_ROSTime.LatestTimeMsg).InverseTransformPoint(destination);
-        }
+        destination = m_TFSystem.GetTransform("map", 0).InverseTransformPoint(destination);
         destination.y = 0;
         m_TeleoperationController.GoToPoint(destination);
     }

@@ -11,7 +11,7 @@ public class ROSTime
     private ROSTime()
     {
         var rosConnection = ROSConnection.GetOrCreateInstance();
-        rosConnection.Subscribe<ClockMsg>("/clock", UpdateTime);
+        // rosConnection.Subscribe<ClockMsg>("/clock", UpdateTime);
     }
 
     private void UpdateTime(ClockMsg msg)

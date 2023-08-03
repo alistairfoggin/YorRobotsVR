@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 
 public class TeleoperationController : MonoBehaviour
 {
-    ROSConnection m_RosConnection;
+    public bool PublishCmdVel { get; set; } = false;
     public string DirectMovementTopicName = "/cmd_vel";
     public string GoalPoseTopicName = "/goal_pose";
     [SerializeField]
@@ -17,8 +17,10 @@ public class TeleoperationController : MonoBehaviour
     float turningSpeed = 1.0f;
     [SerializeField]
     float messageDelay = 0.1f;
+
     float timePassed = 0f;
     Vector2 input = Vector2.zero;
+    ROSConnection m_RosConnection;
 
     [SerializeField]
     InputActionReference movement;
@@ -43,7 +45,7 @@ public class TeleoperationController : MonoBehaviour
     {
         // TODO: refactor to not always publish
         timePassed += Time.deltaTime;
-        if (timePassed > messageDelay)
+        if (PublishCmdVel && timePassed > messageDelay)
         {
             TwistMsg msg = new TwistMsg(
                 new Vector3Msg(input.y * movementSpeed, 0, 0),
