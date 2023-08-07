@@ -21,8 +21,13 @@ public class OccupancyMeshGenerator : MonoBehaviour
     private NativeArray<Vector3> vertexBuffer;
     private NativeArray<Vector2> uvBuffer;
     private NativeList<int> triangleBuffer;
+    private NativeArray<Color32> colorBuffer;
+    private int width;
+    private int height;
 
     public Mesh mesh { get; private set; }
+    public Texture2D OccupancyTexture { get; private set; }
+
     public static OccupancyMeshGenerator GetOrCreateInstance()
     {
         if (meshGenerator != null)
@@ -43,6 +48,8 @@ public class OccupancyMeshGenerator : MonoBehaviour
 
         mesh = new Mesh();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; // This has limited support on lower end platforms
+
+        OccupancyTexture = new Texture2D(10, 10, TextureFormat.RGB24, true);
     }
 
     void OnDestroy()
@@ -55,6 +62,7 @@ public class OccupancyMeshGenerator : MonoBehaviour
             vertexBuffer.Dispose();
             uvBuffer.Dispose();
             triangleBuffer.Dispose();
+            colorBuffer.Dispose();
         }
     }
 
@@ -70,10 +78,18 @@ public class OccupancyMeshGenerator : MonoBehaviour
         mesh.SetTriangles(triangleBuffer.ToArray(), 0);
         mesh.RecalculateNormals();
 
+        if (OccupancyTexture.width != width || OccupancyTexture.height != height)
+        {
+            OccupancyTexture.Reinitialize(width, height);
+        }
+        OccupancyTexture.SetPixels32(colorBuffer.ToArray());
+        OccupancyTexture.Apply();
+
         // Dispose of non-GC data
         vertexBuffer.Dispose();
         uvBuffer.Dispose();
         triangleBuffer.Dispose();
+        colorBuffer.Dispose();
         data.Dispose();
 
         // Positioning of object
@@ -103,8 +119,8 @@ public class OccupancyMeshGenerator : MonoBehaviour
 
     private void StartGeneratingMesh(OccupancyGridMsg msg)
     {
-        int width = (int)msg.info.width;
-        int height = (int)msg.info.height;
+        width = (int)msg.info.width;
+        height = (int)msg.info.height;
         float resolution = msg.info.resolution;
 
         int numVertices = (width + 1) * (height + 1) * 2;
@@ -112,6 +128,7 @@ public class OccupancyMeshGenerator : MonoBehaviour
         vertexBuffer = new NativeArray<Vector3>(numVertices, Allocator.Persistent);
         uvBuffer = new NativeArray<Vector2>(numVertices, Allocator.Persistent);
         triangleBuffer = new NativeList<int>(width * height * 12, Allocator.Persistent);
+        colorBuffer = new NativeArray<Color>((int)(msg.info.width * msg.info.height), Allocator.Persistent);
         data = new NativeArray<sbyte>(msg.data, Allocator.Persistent);
 
         MeshGenerationJob job = new MeshGenerationJob
@@ -122,7 +139,8 @@ public class OccupancyMeshGenerator : MonoBehaviour
             data = data,
             vertexBuffer = vertexBuffer,
             uvBuffer = uvBuffer,
-            triangleBuffer = triangleBuffer
+            triangleBuffer = triangleBuffer,
+            colorBuffer = colorBuffer
         };
         handle = job.Schedule();
     }
@@ -140,6 +158,7 @@ public class OccupancyMeshGenerator : MonoBehaviour
         public NativeArray<Vector3> vertexBuffer;
         public NativeArray<Vector2> uvBuffer;
         public NativeList<int> triangleBuffer;
+        public NativeArray<Color32> colorBuffer;
 
 
         private int numVerticesInLayer;
@@ -159,7 +178,7 @@ public class OccupancyMeshGenerator : MonoBehaviour
                     Vector3 vertex = new Vector3(x * resolution, 0, y * resolution);
 
                     vertexBuffer[x + y * (width + 1)] = vertex;
-                    uvBuffer[x + y * (width + 1)] = new Vector2(x / width, 1 - y / height);
+                    uvBuffer[x + y * (width + 1)] = new Vector2((float)x / width, (float)y / height);
 
                     if (y < height && x < width && data[x + width * y] <= threshold)
                     {
@@ -170,6 +189,16 @@ public class OccupancyMeshGenerator : MonoBehaviour
                         triangleBuffer.Add(x + (y + 1) * (width + 1));
                         triangleBuffer.Add(x + 1 + (y + 1) * (width + 1));
                         triangleBuffer.Add(x + 1 + y * (width + 1));
+
+                        if (data[x + y * width] < 0)
+                        {
+                            colorBuffer[x + y * (width)] = Color.cyan;
+                        }
+                        else
+                        {
+                            float val = Mathf.Lerp(1f, 0f, (float)data[x + y * width] / 100);
+                            colorBuffer[x + y * (width)] = new Color(val, val, val);
+                        }
                     }
                 }
             }
@@ -181,8 +210,9 @@ public class OccupancyMeshGenerator : MonoBehaviour
                 {
                     Vector3 vertex = new Vector3(x * resolution, 0.4f, y * resolution);
 
-                    vertexBuffer[x + y * (width + 1) + numVerticesInLayer] = vertex;
-                    uvBuffer[x + y * (width + 1) + numVerticesInLayer] = new Vector2(x / width, 1 - y / height);
+                    int index = x + y * (width + 1) + numVerticesInLayer;
+                    vertexBuffer[index] = vertex;
+                    uvBuffer[index] = new Vector2((float)x / width, (float)y / height);
 
                     if (y < height && x < width && data[x + width * y] > threshold)
                     {

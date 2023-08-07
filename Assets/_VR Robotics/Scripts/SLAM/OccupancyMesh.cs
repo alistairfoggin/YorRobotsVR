@@ -1,9 +1,3 @@
-using RosMessageTypes.Nav;
-using Unity.Burst;
-using Unity.Collections;
-using Unity.Jobs;
-using Unity.Robotics.ROSTCPConnector;
-using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 using UnityEngine;
 
 public class OccupancyMesh : MonoBehaviour
