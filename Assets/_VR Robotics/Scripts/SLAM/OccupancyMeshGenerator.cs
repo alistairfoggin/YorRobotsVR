@@ -128,7 +128,7 @@ public class OccupancyMeshGenerator : MonoBehaviour
         vertexBuffer = new NativeArray<Vector3>(numVertices, Allocator.Persistent);
         uvBuffer = new NativeArray<Vector2>(numVertices, Allocator.Persistent);
         triangleBuffer = new NativeList<int>(width * height * 12, Allocator.Persistent);
-        colorBuffer = new NativeArray<Color>((int)(msg.info.width * msg.info.height), Allocator.Persistent);
+        colorBuffer = new NativeArray<Color32>((int)(msg.info.width * msg.info.height), Allocator.Persistent);
         data = new NativeArray<sbyte>(msg.data, Allocator.Persistent);
 
         MeshGenerationJob job = new MeshGenerationJob
