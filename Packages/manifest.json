@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.looooong.asyncimageloader": "https://github.com/Looooong/UnityAsyncImageLoader.git",
     "com.unity.collab-proxy": "1.17.7",
     "com.unity.collections": "1.2.4",
     "com.unity.feature.development": "1.0.1",

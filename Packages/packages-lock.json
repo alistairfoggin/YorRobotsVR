@@ -1,5 +1,15 @@
 {
   "dependencies": {
+    "com.looooong.asyncimageloader": {
+      "version": "https://github.com/Looooong/UnityAsyncImageLoader.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.burst": "1.5.4",
+        "com.unity.mathematics": "1.2.1"
+      },
+      "hash": "a7594faf216b93ec4380300f2b70801fa505381e"
+    },
     "com.unity.burst": {
       "version": "1.8.2",
       "depth": 1,

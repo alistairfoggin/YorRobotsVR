@@ -1,24 +1,19 @@
-using RosMessageTypes.Sensor;
 using Unity.Robotics.ROSTCPConnector;
 using UnityEngine;
 
 public class CameraPreview : MonoBehaviour
 {
-    ROSConnection m_ROSConnection;
-    Texture2D m_Texture;
+    private Material m_Material;
+    private CameraSubscriber m_Subscriber;
 
     // Start is called before the first frame update
     void Start()
     {
-        m_ROSConnection = ROSConnection.GetOrCreateInstance();
-        m_Texture = new Texture2D(2, 2);
-        GetComponent<MeshRenderer>().material.mainTexture = m_Texture;
-
-        m_ROSConnection.Subscribe<CompressedImageMsg>("/camera/image_raw/compressed", UpdateImage);
+        m_Material = GetComponent<MeshRenderer>().material;
+        m_Subscriber = CameraSubscriber.GetOrCreateInstance();
     }
-
-    private void UpdateImage(CompressedImageMsg msg)
+    private void Update()
     {
-        ImageConversion.LoadImage(m_Texture, msg.data);
+        m_Material.mainTexture = m_Subscriber.ImageTexture;
     }
 }
