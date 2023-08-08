@@ -10254,6 +10254,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1086873597, guid: c3588a7ecb7fb62428b79bff3cba1cf0, type: 3}
+      propertyPath: m_RenderTexture
+      value: 
+      objectReference: {fileID: 8400000, guid: d5bcb2da186918f48989b0cad386ee7a, type: 2}
+    - target: {fileID: 1086873599, guid: c3588a7ecb7fb62428b79bff3cba1cf0, type: 3}
+      propertyPath: m_Cookie
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4577375779808097672, guid: c3588a7ecb7fb62428b79bff3cba1cf0,
         type: 3}
       propertyPath: m_IsActive

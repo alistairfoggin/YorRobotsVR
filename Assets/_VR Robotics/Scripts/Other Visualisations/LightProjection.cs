@@ -1,19 +1,28 @@
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 
 public class LightProjection : MonoBehaviour
 {
-    Light m_Light;
+    RenderTexture m_RenderTexture;
     CameraSubscriber m_Subscriber;
+
     // Start is called before the first frame update
     void Start()
     {
-        m_Light = GetComponent<Light>();
         m_Subscriber = CameraSubscriber.GetOrCreateInstance();
+        m_Subscriber.ImageUpdatedAction += ImageUpdated;
     }
 
-    private void Update()
+    private void ImageUpdated()
     {
-        m_Light.cookie = m_Subscriber.ImageTexture;
+        if (m_RenderTexture == null || m_RenderTexture.width != m_Subscriber.ImageTexture.width || m_RenderTexture.height != m_Subscriber.ImageTexture.height)
+        {
+            if (m_RenderTexture != null)
+                m_RenderTexture.DiscardContents();
+            m_RenderTexture = new RenderTexture(m_Subscriber.ImageTexture.width, m_Subscriber.ImageTexture.height, 0);
+            m_RenderTexture.autoGenerateMips = false;
+            m_RenderTexture.Create();
+        }
+        Graphics.Blit(m_Subscriber.ImageTexture, m_RenderTexture);
+        GetComponent<Light>().cookie = m_RenderTexture;
     }
 }
