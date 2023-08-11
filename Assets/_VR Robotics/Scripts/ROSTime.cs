@@ -11,7 +11,7 @@ public class ROSTime
     private ROSTime()
     {
         var rosConnection = ROSConnection.GetOrCreateInstance();
-        // rosConnection.Subscribe<ClockMsg>("/clock", UpdateTime);
+        rosConnection.Subscribe<ClockMsg>("/clock", UpdateTime); // Does not necessarily work if the topic has QoS settings incompatible with ROS TCP Endpoint
     }
 
     private void UpdateTime(ClockMsg msg)
