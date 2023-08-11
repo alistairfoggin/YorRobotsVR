@@ -46,12 +46,13 @@ To install the ROS-TCP Endpoint
 cd ~/ros2_ws/src
 git clone -b main-ros2 https://github.com/Unity-Technologies/ROS-TCP-Endpoint.git
 cd ..
+```
 
 #### Gazebo Classic Camera Simulation for Turtlebot3
 Warning these files require root permissions to edit, and will be overwritten when updating certain packages
 
-Open /opt/ros/humble/share/turtlebot3_gazebo/models/turtlebot3_burger/model.sdf
-And add this to the end before `</model>
+Open `/opt/ros/humble/share/turtlebot3_gazebo/models/turtlebot3_burger/model.sdf`
+And add this to the end before `</model>`
 ```xml
 <joint name="camera_joint" type="fixed">
   <parent>base_link</parent>
@@ -136,7 +137,7 @@ And add this to the end before `</model>
 </link>
    ```
 
-Open /opt/ros/humble/share/turtlebot3_gazebo/urdf/turtlebot3_burger.urdf and add the following before `</robot>`
+Open `/opt/ros/humble/share/turtlebot3_gazebo/urdf/turtlebot3_burger.urdf` and add the following before `</robot>`
 ```xml  
 <joint name="camera_joint" type="fixed">
   <axis xyz="0 1 0" />
