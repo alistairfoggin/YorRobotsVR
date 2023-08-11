@@ -5772,6 +5772,11 @@ PrefabInstance:
       propertyPath: m_ShowHUD
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4475875187687746324, guid: bdce8ec0a872023439328396b1bb0eba,
+        type: 3}
+      propertyPath: m_RosIPAddress
+      value: 144.32.175.129
+      objectReference: {fileID: 0}
     - target: {fileID: 6954468309546181172, guid: bdce8ec0a872023439328396b1bb0eba,
         type: 3}
       propertyPath: m_RootOrder
