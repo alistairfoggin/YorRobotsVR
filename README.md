@@ -13,7 +13,8 @@ sudo apt install virtualbox-guest-utils
 Install ROS2 Humble: Ubuntu (Debian packages) — [ROS 2 Documentation: Humble documentation](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html)
 ### Network Settings
 Power off the VM, and go to network settings. Change it to be attached to "Bridged Adapter", set Name to be the adapter connected to your network. Open up advanced, and set Promiscuous Mode to be "Allow All"
-![image](https://github.com/codexpro88/YorRobotsVR/assets/20808504/7cd22373-834b-46bc-92e2-792bdda0627b)
+
+![VM Bridged Adapter](Docs/Images/VM_Bridged_Adapter.png)
 
 ### ROS Packages and Setup
 Start up the VM again, and create a new ROS 2 Workspace
@@ -187,7 +188,7 @@ Then in the inspector set the ROS IP Address.
 Start up the Ubuntu VM if it is not already running.
 There are four commands to run for simulating the robot with slam and navigation
 
-To run the ROS TCP Endpoint run the following replacing <IP ADDRESS> with the IP address found above using `hostname -I`.
+To run the ROS TCP Endpoint run the following replacing `<IP ADDRESS>` with the IP address found above using `hostname -I`.
 ```sh
 cd ~/ros2_ws
 source install/setup.bash (May not exist so ignore it on first run)
