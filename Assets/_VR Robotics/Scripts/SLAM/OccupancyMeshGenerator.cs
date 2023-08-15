@@ -49,7 +49,8 @@ public class OccupancyMeshGenerator : MonoBehaviour
         mesh = new Mesh();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; // This has limited support on lower end platforms
 
-        OccupancyTexture = new Texture2D(10, 10, TextureFormat.RGB24, true);
+        OccupancyTexture = new Texture2D(10, 10, TextureFormat.RGB24, false);
+        OccupancyTexture.filterMode = FilterMode.Point;
     }
 
     void OnDestroy()

@@ -36,8 +36,13 @@ public class TurtlebotTracking : MonoBehaviour
         odomPosition.y = 0;
 
         if (trackPosition)
+        {
             transform.localPosition = odomPosition;
+            print("Tracking: " + odomPosition.ToString());
+        }
         if (trackOrientation)
+        {
             transform.localRotation = Quaternion.Euler(odomOrientation.eulerAngles + tfFrame.rotation.eulerAngles);
+        }
     }
 }
