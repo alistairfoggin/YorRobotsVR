@@ -24,9 +24,11 @@ public class OccupancyMeshGenerator : MonoBehaviour
     private NativeArray<Color32> colorBuffer;
     private int width;
     private int height;
+    private Vector2 m_TextureDimensions;
 
     public Mesh mesh { get; private set; }
     public Texture2D OccupancyTexture { get; private set; }
+    public Vector2 TextureDimensions { get => m_TextureDimensions; }
 
     public static OccupancyMeshGenerator GetOrCreateInstance()
     {
@@ -51,6 +53,7 @@ public class OccupancyMeshGenerator : MonoBehaviour
 
         OccupancyTexture = new Texture2D(10, 10, TextureFormat.RGB24, false);
         OccupancyTexture.filterMode = FilterMode.Point;
+        m_TextureDimensions = Vector2.one;
     }
 
     void OnDestroy()
@@ -85,6 +88,8 @@ public class OccupancyMeshGenerator : MonoBehaviour
         }
         OccupancyTexture.SetPixels32(colorBuffer.ToArray());
         OccupancyTexture.Apply();
+        m_TextureDimensions.x = width * m_LastMsg.info.resolution;
+        m_TextureDimensions.y = height * m_LastMsg.info.resolution;
 
         // Dispose of non-GC data
         vertexBuffer.Dispose();

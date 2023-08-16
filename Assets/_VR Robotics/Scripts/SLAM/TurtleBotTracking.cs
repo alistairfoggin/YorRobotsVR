@@ -14,6 +14,8 @@ public class TurtlebotTracking : MonoBehaviour
     [SerializeField]
     bool trackOrientation = true;
 
+    float m_LastTime = 0.0f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,6 +27,8 @@ public class TurtlebotTracking : MonoBehaviour
 
     void OdomChange(OdometryMsg msg)
     {
+        if (Time.time <= m_LastTime) return;
+
         PointMsg pointMsg = msg.pose.pose.position;
         QuaternionMsg quaternionMsg = msg.pose.pose.orientation;
 
@@ -38,11 +42,12 @@ public class TurtlebotTracking : MonoBehaviour
         if (trackPosition)
         {
             transform.localPosition = odomPosition;
-            print("Tracking: " + odomPosition.ToString());
         }
         if (trackOrientation)
         {
             transform.localRotation = Quaternion.Euler(odomOrientation.eulerAngles + tfFrame.rotation.eulerAngles);
         }
+
+        m_LastTime = Time.time;
     }
 }
