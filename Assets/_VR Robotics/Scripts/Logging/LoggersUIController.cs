@@ -26,6 +26,7 @@ public class LoggersUIController : MonoBehaviour
         m_Loggers = new Dictionary<string, LoggerSource>();
         m_LoggerToggles = new Dictionary<string, LoggerSourceToggle>();
         m_LoggerSourceController.gameObject.SetActive(false);
+
         m_ROSConnection = ROSConnection.GetOrCreateInstance();
         m_ROSConnection.Subscribe<LogMsg>("/rosout", AddLog);
     }
@@ -34,6 +35,7 @@ public class LoggersUIController : MonoBehaviour
     {
         LoggerSource logger;
         LoggerSourceToggle toggle;
+        // Add toggle for the source log name if it is not already there
         if (!m_Loggers.TryGetValue(msg.name, out logger))
         {
             logger = new LoggerSource(msg.name);

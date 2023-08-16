@@ -29,6 +29,7 @@ public class CameraSubscriber : MonoBehaviour
         ImageTexture.wrapMode = TextureWrapMode.Clamp;
         ImageTexture.filterMode = FilterMode.Bilinear;
 
+        // Setup image decoding settings to run on a seperate thread
         m_LoaderSettings = new AsyncImageLoader.LoaderSettings
         {
             generateMipmap = false,
@@ -43,6 +44,7 @@ public class CameraSubscriber : MonoBehaviour
 
     private void UpdateImage(CompressedImageMsg msg)
     {
+        // decode image message if not currently decoding an image
         if (m_DecodingTask == null)
         {
             m_DecodingTask = AsyncImageLoader.LoadImageAsync(ImageTexture, msg.data, m_LoaderSettings);

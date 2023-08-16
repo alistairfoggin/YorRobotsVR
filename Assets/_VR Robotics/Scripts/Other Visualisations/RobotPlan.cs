@@ -23,8 +23,9 @@ class RobotPlan : MonoBehaviour
 
     private void UpdatePlan(PathMsg msg)
     {
-        var tf = m_TFSystem.GetTransform(msg.header);
-        var unityPoints = msg.poses.Select(poseStamped => tf.TransformPoint(poseStamped.pose.position.From<FLU>())).ToArray();
+        TFFrame tf = m_TFSystem.GetTransform(msg.header);
+        // Map array of pose messages to be an array of Unity Vectors
+        Vector3[] unityPoints = msg.poses.Select(poseStamped => tf.TransformPoint(poseStamped.pose.position.From<FLU>())).ToArray();
         m_LineRenderer.positionCount = unityPoints.Length;
         m_LineRenderer.SetPositions(unityPoints);
     }

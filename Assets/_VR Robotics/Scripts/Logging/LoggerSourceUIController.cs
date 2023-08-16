@@ -54,13 +54,17 @@ class LoggerSourceUIController : MonoBehaviour
 
     public void UpdateUI()
     {
+        // Set counts of saved messages for each severity
         m_DebugCountLabel.SetText(m_LoggerSource.GetLogsForLevel(LoggerSource.LogLevel.DEBUG).Count.ToString());
         m_InfoCountLabel.SetText(m_LoggerSource.GetLogsForLevel(LoggerSource.LogLevel.INFO).Count.ToString());
         m_WarnCountLabel.SetText(m_LoggerSource.GetLogsForLevel(LoggerSource.LogLevel.WARN).Count.ToString());
         m_ErrorCountLabel.SetText(m_LoggerSource.GetLogsForLevel(LoggerSource.LogLevel.ERROR).Count.ToString());
         m_FatalCountLabel.SetText(m_LoggerSource.GetLogsForLevel(LoggerSource.LogLevel.FATAL).Count.ToString());
 
+        // Update the list of messages for the selected severity
         LogMsg[] logMsgs = m_LoggerSource.GetLogsForLevel(m_LogLevel).ToArray();
+
+        // Update existing components
         for (int i = 0; i < m_LogMsgListItems.Count; i++)
         {
             LogMsgListItem listItem = m_LogMsgListItems[i];
@@ -76,6 +80,8 @@ class LoggerSourceUIController : MonoBehaviour
                 listItem.GetComponent<Toggle>().isOn = listItem.Message == m_LogMsg;
             }
         }
+
+        // Add more components if necesary
         if (logMsgs.Length > m_LogMsgListItems.Count)
         {
             for (int i = m_LogMsgListItems.Count; i < logMsgs.Length; i++)
@@ -85,6 +91,7 @@ class LoggerSourceUIController : MonoBehaviour
                 listItem.transform.SetParent(m_MessageToggleGroup.transform, false);
                 listItem.UIController = this;
                 listItem.SetLogMessage(logMsgs[i]);
+
                 Toggle listItemToggle = listItem.GetComponent<Toggle>();
                 listItemToggle.group = m_MessageToggleGroup;
                 listItemToggle.isOn = false;
@@ -92,6 +99,7 @@ class LoggerSourceUIController : MonoBehaviour
             }
         }
 
+        // If there is a selected message, show the details
         if (m_MessageToggleGroup.AnyTogglesOn() && m_LogMsg != null)
         {
             // show message

@@ -12,7 +12,7 @@ public class CameraPreview : XRBaseInteractable
     private MeshRenderer m_OverheadScreen;
     private MeshCollider m_OverheadScreenCollider;
 
-    bool m_IsCameraTop = true;
+    private bool m_IsCameraTop = true;
 
     // Start is called before the first frame update
     void Start()
@@ -22,6 +22,7 @@ public class CameraPreview : XRBaseInteractable
         m_OverheadScreen = GetComponent<MeshRenderer>();
         m_OverheadScreenCollider = GetComponent<MeshCollider>();
         m_OverheadScreen.material.mainTexture = m_Subscriber.ImageTexture;
+
         m_FrontScreen.gameObject.SetActive(false);
         m_FrontScreen.material.mainTexture = m_Subscriber.ImageTexture;
         m_OverheadMapTransform.gameObject.SetActive(false);
