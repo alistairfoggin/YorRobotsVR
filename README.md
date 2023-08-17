@@ -1,7 +1,9 @@
 # Virtual Reality Interface for Robot Teleoperation and Environment Visualisation
 A Virtual Reality interface implemented in Unity which is used to connect to a mobile robot running the Robot Operating System. 
 It provides visualisations of sensor data as well as controls for teleoperation. It was created as part of a 
-(YorRobots Venables Internship)[https://www.york.ac.uk/yorrobots/news-events/news/2023/venables-internships-2023/] in the summer of 2023.
+[YorRobots Venables Internship](https://www.york.ac.uk/yorrobots/news-events/news/2023/venables-internships-2023/) in the summer of 2023.
+
+![Screenshot of interface with map dashboard](Docs/Images//Screenshot_Minimap.png)
 
 ## Setup
 - Ubuntu 22.04 VM with ROS2 Humble
