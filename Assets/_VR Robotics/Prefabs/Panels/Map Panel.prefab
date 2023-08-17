@@ -2185,7 +2185,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73a64e65082ec814fa694fd6246b0b0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  otherTransform: {fileID: 8719876117645975174}
+  m_OtherTransform: {fileID: 8719876117645975174}
+  m_MinimumAngle: -90
+  m_MaximumAngle: 0
 --- !u!4 &8603494132031375995 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3344241857523076466, guid: 04052c76cd8138f47bfc66ae8d456707,

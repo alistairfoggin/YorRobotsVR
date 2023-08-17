@@ -1,5 +1,7 @@
 # Virtual Reality Interface for Robot Teleoperation and Environment Visualisation
-A Virtual Reality interface implemented in Unity which is used to connect to a mobile robot running the Robot Operating System. It provides visualisations of sensor data as well as controls for teleoperation. It was created as part of a YorRobots Venables Internship in the summer of 2023.
+A Virtual Reality interface implemented in Unity which is used to connect to a mobile robot running the Robot Operating System. 
+It provides visualisations of sensor data as well as controls for teleoperation. It was created as part of a 
+(YorRobots Venables Internship)[https://www.york.ac.uk/yorrobots/news-events/news/2023/venables-internships-2023/] in the summer of 2023.
 
 ## Setup
 - Ubuntu 22.04 VM with ROS2 Humble
@@ -49,7 +51,7 @@ Launch Navigation2 in a new terminal:
 ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True
 ```
 
-To launch the unity project, make sure the ROS Connector Script has the right IP address, connect the VR headset and click play
+To launch the unity project, open `Assets/_VR Robotics/Scenes/Base Scene.unity`. Make sure the ROS Connector Script in the `ROS Tools->ROSConnectionPrefab` GameObject has the right IP address, connect the VR headset and click play.
 
 ## Running the Interface with an Actual Turtlebot3
 ### Turtlebot3 
@@ -82,4 +84,4 @@ source install/setup.bash
 ros2 run ros_tcp_endpoint default_server_endpoint –ros-args -p ROS_IP:=<IP ADDRESS>
 ```
 ### Windows
-To launch the unity project, make sure the ROS Connector Script has the right IP address, connect the VR headset and click play
+To launch the unity project, open `Assets/_VR Robotics/Scenes/Base Scene.unity`. Make sure the ROS Connector Script in the `ROS Tools -> ROSConnectionPrefab` GameObject has the right IP address, connect the VR headset and click play.

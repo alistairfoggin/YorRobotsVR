@@ -4,14 +4,14 @@ using UnityEngine;
 public class OccupancyMesh : MonoBehaviour
 {
     OccupancyMeshGenerator m_MeshGenerator;
-    private BoxCollider m_BoxCollider;
+    [SerializeField]
+    private Transform m_Bounds;
 
-    // Start is called before the first frame update
     void Start()
     {
         m_MeshGenerator = OccupancyMeshGenerator.GetOrCreateInstance();
         GetComponent<MeshFilter>().mesh = m_MeshGenerator.mesh;
-        m_BoxCollider = GetComponent<BoxCollider>();
+        UpdateTransform(m_MeshGenerator.DrawOrigin, m_MeshGenerator.DrawRotation);
         m_MeshGenerator.transformUpdateDelegate += UpdateTransform;
     }
 
@@ -20,10 +20,12 @@ public class OccupancyMesh : MonoBehaviour
         transform.localPosition = localPosition;
         transform.localRotation = localRotation;
 
-        if (m_BoxCollider != null)
+        // If there are any bounds, update the dimensions.
+        if (m_Bounds != null)
         {
-            m_BoxCollider.size = new Vector3(m_MeshGenerator.TextureDimensions.x, .1f, m_MeshGenerator.TextureDimensions.y);
-            m_BoxCollider.center = m_BoxCollider.size / 2f;
+            m_Bounds.localScale = new Vector3(m_MeshGenerator.TextureDimensions.x, m_MeshGenerator.TextureDimensions.y, 1f);
+            // localPosition is from the upper left point, shift the bounds by half of the scale so make the origin of the mesh be the upper left corner
+            m_Bounds.localPosition = new Vector3(localPosition.x - m_Bounds.localScale.y / 2f, -0.001f, localPosition.z + m_Bounds.localScale.x / 2f );
         }
     }
 }

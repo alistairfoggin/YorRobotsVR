@@ -25,13 +25,13 @@ public class TeleoperationController : MonoBehaviour
     [SerializeField]
     InputActionReference movement;
 
-    // Start is called before the first frame update
     void Start()
     {
         m_RosConnection = ROSConnection.GetOrCreateInstance();
         m_RosConnection.RegisterPublisher<TwistMsg>(DirectMovementTopicName);
         m_RosConnection.RegisterPublisher<PoseStampedMsg>(GoalPoseTopicName);
 
+        // Allow user input to directly move the robot as an alternative to the joysticks
         movement.action.performed += MovementPerformed;
     }
 
@@ -40,13 +40,13 @@ public class TeleoperationController : MonoBehaviour
         input = context.ReadValue<Vector2>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // TODO: refactor to not always publish
         timePassed += Time.deltaTime;
+        // Check if it should send an update to the movement topic
         if (PublishCmdVel && timePassed > messageDelay)
         {
+            // Calculate the movement and turning speeds given the input amounts
             TwistMsg msg = new TwistMsg(
                 new Vector3Msg(input.y * movementSpeed, 0, 0),
                 new Vector3Msg(0, 0, -input.x * turningSpeed));
@@ -57,6 +57,7 @@ public class TeleoperationController : MonoBehaviour
     }
     public void GoToPoint(Vector3 goal)
     {
+        // Calculate the ROS destination goal and publish it
         PoseStampedMsg msg = new PoseStampedMsg(
             new HeaderMsg(new TimeMsg(), "map"),
             new PoseMsg(goal.To<FLU>(), new QuaternionMsg()));

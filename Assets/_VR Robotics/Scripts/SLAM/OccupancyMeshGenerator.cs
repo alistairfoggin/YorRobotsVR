@@ -14,8 +14,6 @@ public class OccupancyMeshGenerator : MonoBehaviour
     private TFSystem m_TFSystem;
     private OccupancyGridMsg m_LastMsg;
 
-    public delegate void TransformUpdateDelegate(Vector3 localPosition, Quaternion localRotation);
-    public TransformUpdateDelegate transformUpdateDelegate;
     private JobHandle? handle = null;
     private NativeArray<sbyte> data;
     private NativeArray<Vector3> vertexBuffer;
@@ -26,9 +24,14 @@ public class OccupancyMeshGenerator : MonoBehaviour
     private int height;
     private Vector2 m_TextureDimensions;
 
+    public delegate void TransformUpdateDelegate(Vector3 localPosition, Quaternion localRotation);
+    public TransformUpdateDelegate transformUpdateDelegate;
+
     public Mesh mesh { get; private set; }
     public Texture2D OccupancyTexture { get; private set; }
     public Vector2 TextureDimensions { get => m_TextureDimensions; }
+    public Vector3 DrawOrigin { get; private set; }
+    public Quaternion DrawRotation { get; private set; }
 
     public static OccupancyMeshGenerator GetOrCreateInstance()
     {
@@ -54,6 +57,9 @@ public class OccupancyMeshGenerator : MonoBehaviour
         OccupancyTexture = new Texture2D(10, 10, TextureFormat.RGB24, false);
         OccupancyTexture.filterMode = FilterMode.Point;
         m_TextureDimensions = Vector2.one;
+
+        DrawOrigin = Vector3.zero;
+        DrawRotation = Quaternion.identity;
     }
 
     void OnDestroy()
@@ -100,18 +106,18 @@ public class OccupancyMeshGenerator : MonoBehaviour
 
         // Positioning of object
         Vector3 origin = m_LastMsg.info.origin.position.From<FLU>();
-        Quaternion rotation = m_LastMsg.info.origin.orientation.From<FLU>();
-        rotation.eulerAngles += new Vector3(0, -90, 0);
+        Quaternion drawRotation = m_LastMsg.info.origin.orientation.From<FLU>();
+        drawRotation.eulerAngles += new Vector3(0, -90, 0);
         float scale = m_LastMsg.info.resolution;
 
         // offset the mesh by half a grid square, because the message's position defines the CENTER of grid square 0,0
-        Vector3 drawOrigin = origin - rotation * new Vector3(scale * 0.5f, 0, scale * 0.5f);
+        DrawOrigin = origin - drawRotation * new Vector3(scale * 0.5f, 0, scale * 0.5f);
 
         TFFrame tfFrame = m_TFSystem.GetTransform(m_LastMsg.header);
-        drawOrigin = tfFrame.TransformPoint(drawOrigin);
-        rotation = Quaternion.Euler(rotation.eulerAngles + tfFrame.rotation.eulerAngles);
+        DrawOrigin = tfFrame.TransformPoint(DrawOrigin);
+        DrawRotation = Quaternion.Euler(drawRotation.eulerAngles + tfFrame.rotation.eulerAngles);
 
-        transformUpdateDelegate.Invoke(drawOrigin, rotation);
+        transformUpdateDelegate.Invoke(DrawOrigin, DrawRotation);
         handle = null;
     }
 
@@ -176,32 +182,40 @@ public class OccupancyMeshGenerator : MonoBehaviour
             triangleBuffer.Clear();
             threshold = 50;
 
-            // Layer 1
+            // Layer 1 Grid. Loop over all lower vertices where one vertex exists for every corner of the cells
             for (int y = 0; y <= height; y++)
             {
                 for (int x = 0; x <= width; x++)
                 {
                     Vector3 vertex = new Vector3(x * resolution, 0, y * resolution);
 
+                    // Set vertex position and UV coordinate
                     vertexBuffer[x + y * (width + 1)] = vertex;
                     uvBuffer[x + y * (width + 1)] = new Vector2((float)x / width, (float)y / height);
 
-                    if (y < height && x < width && data[x + width * y] <= threshold)
+                    // Fill in faces for unoccupied cells
+                    if (y < height && x < width)
                     {
-                        triangleBuffer.Add(x + y * (width + 1));
-                        triangleBuffer.Add(x + (y + 1) * (width + 1));
-                        triangleBuffer.Add(x + 1 + y * (width + 1));
 
-                        triangleBuffer.Add(x + (y + 1) * (width + 1));
-                        triangleBuffer.Add(x + 1 + (y + 1) * (width + 1));
-                        triangleBuffer.Add(x + 1 + y * (width + 1));
-
+                        // Set pixel colour of occupancy grid to cyan for unknown, or go between white for unoccupied to black for occupied
                         if (data[x + y * width] < 0)
                         {
                             colorBuffer[x + y * (width)] = Color.cyan;
                         }
                         else
                         {
+                            if (data[x + width * y] <= threshold)
+                            {
+                                // Create triangles (Unity has a clockwise winding order)
+                                triangleBuffer.Add(x + y * (width + 1)); // Lower left vertex
+                                triangleBuffer.Add(x + (y + 1) * (width + 1)); // Upper left vertex
+                                triangleBuffer.Add(x + 1 + y * (width + 1)); // Lower right vertex
+
+                                triangleBuffer.Add(x + (y + 1) * (width + 1)); // Upper left vertex
+                                triangleBuffer.Add(x + 1 + (y + 1) * (width + 1)); // Upper right vertex
+                                triangleBuffer.Add(x + 1 + y * (width + 1)); // Lower right vertex
+                            }
+
                             float val = Mathf.Lerp(1f, 0f, (float)data[x + y * width] / 100);
                             colorBuffer[x + y * (width)] = new Color(val, val, val);
                         }
@@ -209,7 +223,7 @@ public class OccupancyMeshGenerator : MonoBehaviour
                 }
             }
 
-            // Layer 2
+            // Layer 2 grid. Loop over all upper vertices where one vertex exists for every corner of the cells
             for (int y = 0; y <= height; y++)
             {
                 for (int x = 0; x <= width; x++)

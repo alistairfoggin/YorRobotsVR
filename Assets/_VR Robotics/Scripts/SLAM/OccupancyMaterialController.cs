@@ -22,6 +22,8 @@ public class OccupancyMaterialController : MonoBehaviour
     {
         if (centreTransform != null)
         {
+            // Update shader to know which parts of the map to show. The shader has the bounds to show, this just tells it where
+            // to centre the bounds, and what the orientation of the minimap is.
             occupancyMaterial.SetVector("_Centre", centreTransform.position);
             occupancyMaterial.SetFloat("_Rotation", -centreTransform.GetComponentInParent<Transform>().rotation.eulerAngles.x);
         }

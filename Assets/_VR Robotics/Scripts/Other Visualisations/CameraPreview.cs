@@ -32,17 +32,21 @@ public class CameraPreview : XRBaseInteractable
     {
         if (m_IsCameraTop)
         {
+            // Toggle the front screen on and show the map
             m_FrontScreen.gameObject.SetActive(true);
             m_OverheadMapTransform.gameObject.SetActive(true);
 
+            // Hide the overhead screen
             m_OverheadScreen.enabled = false;
             m_OverheadScreenCollider.enabled = false;
         }
         else
         {
+            // Hide the map and the front screen
             m_FrontScreen.gameObject.SetActive(false);
             m_OverheadMapTransform.gameObject.SetActive(false);
 
+            // Show the overhead screen
             m_OverheadScreen.enabled = true;
             m_OverheadScreenCollider.enabled = true;
         }

@@ -18,7 +18,6 @@ public class InverseMapTracking : MonoBehaviour
     [SerializeField]
     bool isMinimap = true;
 
-    // Start is called before the first frame update
     void Start()
     {
         m_RosConnection = ROSConnection.GetOrCreateInstance();
@@ -31,27 +30,34 @@ public class InverseMapTracking : MonoBehaviour
         PointMsg pointMsg = msg.pose.pose.position;
         QuaternionMsg quaternionMsg = msg.pose.pose.orientation;
 
+        // Convert ROS local coordinates to Unity coordinates local coordinates
         Vector3 odomPosition = pointMsg.From<FLU>();
         Quaternion odomOrientation = quaternionMsg.From<FLU>();
 
+        // Transform position to be based around ROS (0, 0)
         TFFrame tfFrame = m_TFSystem.GetTransform(msg.header);
         odomPosition = tfFrame.TransformPoint(odomPosition);
         odomPosition.y = 0;
 
+        // Move map based on the robot position
         if (trackPosition)
         {
             transform.localPosition = -odomPosition;
         }
+        // Rotate the map based on the robot orientation
         if (trackOrientation)
         {
             transform.localRotation = Quaternion.Euler(Vector3.zero);
+            // Find the point to rotate around
             if (isMinimap)
             {
                 transform.RotateAround(GetComponentInParent<Transform>().position, Vector3.up, -odomOrientation.eulerAngles.y - tfFrame.rotation.eulerAngles.y - rotationFix);
-            } else
+            }
+            else
             {
                 transform.RotateAround(Vector3.zero, Vector3.up, -odomOrientation.eulerAngles.y - tfFrame.rotation.eulerAngles.y - rotationFix);
 
             }
         }
-    }}
+    }
+}

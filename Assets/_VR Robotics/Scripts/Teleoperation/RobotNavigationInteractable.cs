@@ -68,6 +68,7 @@ public class RobotNavigationInteractable : XRBaseInteractable
 
     protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
+        // When ray interactor selects this interactable, check the currently selected tool and call the appropriate action
         if (args.interactorObject is XRRayInteractor)
         {
             m_RayInteractor = (XRRayInteractor)args.interactorObject;
@@ -88,22 +89,26 @@ public class RobotNavigationInteractable : XRBaseInteractable
 
     protected override void OnSelectExited(SelectExitEventArgs args)
     {
+        // Reset controls when deselected
         m_RayInteractor = null;
         m_DirectionIndicator.SetActive(false);
     }
 
     private void OnDestinationSelect()
     {
+        // Get the hit location
         Vector3 hitPosition;
         Vector3 hitNormal;
         m_RayInteractor.TryGetHitInfo(out hitPosition, out hitNormal, out _, out _);
 
+        // Ensure that the hit is on top of the interactable
         if (Vector3.Dot(hitNormal.normalized, transform.up) < 0.95f)
         {
             return;
         }
 
         Vector3 destination;
+        // Get the local position but keep the scale as normal
         if (m_MapCentreTransform != null)
         {
             destination = m_MapCentreTransform.InverseTransformPoint(hitPosition);
@@ -115,12 +120,16 @@ public class RobotNavigationInteractable : XRBaseInteractable
             destination.Scale(transform.localScale);
         }
 
+        // Convert it to ROS local space relative to the map
         destination = m_TFSystem.GetTransform("map", 0).InverseTransformPoint(destination);
         destination.y = 0;
+        
+        // Send the destination to the robot
         m_TeleoperationController.GoToPoint(destination);
     }
     private void OnMoveSelectEntered()
     {
+        // Get the location grabbed and find the fixed offset to keep
         RaycastHit hit;
         m_RayInteractor.TryGetCurrent3DRaycastHit(out hit);
         m_AttachOffet = hit.point - m_RobotWorldWrapperTransform.position;
@@ -128,8 +137,11 @@ public class RobotNavigationInteractable : XRBaseInteractable
 
     private void OnRotateSelectEntered()
     {
+        // Show the rotation indicator at the centre to show the pivot point
         m_DirectionIndicator.transform.position = transform.position + m_IndicatorOffset;
         m_DirectionIndicator.SetActive(true);
+
+        // Get the vector and angle from the pivot to the grab point
         RaycastHit hit;
         m_RayInteractor.TryGetCurrent3DRaycastHit(out hit);
         m_AttachOffet = hit.point - transform.position;
@@ -138,10 +150,12 @@ public class RobotNavigationInteractable : XRBaseInteractable
 
     public override void ProcessInteractable(XRInteractionUpdateOrder.UpdatePhase updatePhase)
     {
+        // Only run this in the dynamic phase which is called during Update()
         if (updatePhase != XRInteractionUpdateOrder.UpdatePhase.Dynamic) { return; }
 
         if (mapControlMode == MapControlMode.Move && m_RayInteractor != null)
         {
+            // Get the updated grab position and move the map to keep the constant offset
             RaycastHit hit;
             if (m_RayInteractor.TryGetCurrent3DRaycastHit(out hit) && hit.collider.gameObject.layer == LayerMask.NameToLayer("Robot"))
             {
@@ -150,6 +164,7 @@ public class RobotNavigationInteractable : XRBaseInteractable
         }
         else if (mapControlMode == MapControlMode.Rotate && m_RayInteractor != null)
         {
+            // Get the updated grab position and rotate the map around the pivot to maintain the constant angle
             RaycastHit hit;
             if (m_RayInteractor.TryGetCurrent3DRaycastHit(out hit) && hit.collider.gameObject.layer == LayerMask.NameToLayer("Robot"))
             {
