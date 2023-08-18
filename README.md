@@ -5,6 +5,8 @@ It provides visualisations of sensor data as well as controls for teleoperation.
 
 ![Screenshot of interface with map dashboard](Docs/Images//Screenshot_Minimap.png)
 
+[Video Demonstrations](https://github.com/alistairfoggin/YorRobotsVR/wiki/Demonstrations)
+
 ## Setup
 - Ubuntu 22.04 VM with ROS2 Humble
     - Turtlebot3 Nodes
